@@ -24,6 +24,10 @@ def run():
 
 def correct():
 	angle = gy.value()
+	
+	while raw_angle > 360:
+		raw_angle -= 360
+
 	error = heading - angle 
 	percent_error = error/25
 
