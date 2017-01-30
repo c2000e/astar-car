@@ -25,8 +25,11 @@ def correct():
 	error = heading - angle 
 	percent_error = error/25
 
-	if percent_error > (-900-base_speed)/base_speed:
-		percent_error = (-900-base_speed)/base_speed
+	if percent_error < (900/base_speed) + 1:
+		percent_error = (900/base_speed) + 1
+
+	elif percent_error > (-900/base_speed) - 1:
+		percent_error = (-900/base_speed) - 1
 
 	i = 0
 	for m in motors:
@@ -58,7 +61,7 @@ def turn():
 				m.speed_sp = -base_speed/3
 			i += 1
 
-Sound.tone((1500, 500, 100), (1000, 500)).wait()
+Sound.tone([(1500, 500, 100), (1000, 500)]).wait()
 
 distance = ir.value()
 heading = 0
@@ -70,9 +73,12 @@ while True:
 
 		distance = ir.value()
 
-	Sound.tone(1500, 1000).wait()
+	for m in motors:
+		m.stop(stop_action = "hold")
 
 	if j < 10:
+		Sound.tone(1500, 1000).wait()
+
 		heading = 88
 		angle = gy.value()
 
@@ -95,9 +101,6 @@ while True:
 		j += 1
 	
 	else:
-		for m in motors:
-			m.stop(stop_action="brake")
-	
 		break
 
 	Sound.tone(1000, 1000).wait()
