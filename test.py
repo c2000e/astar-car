@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from ev3dev.ev3 import *
 import time
+import random
 
 ir = InfraredSensor()
 assert ir.connected, "Connect ultrasound sensor"
@@ -76,10 +77,18 @@ while True:
 	for m in motors:
 		m.stop(stop_action = "hold")
 
-	if j < 10:
+	Sound.tone(1500, 1000).wait()
+
+	time.sleep(3)
+
+	distance = ir.value()
+
+	if distance < 50:
 		Sound.tone(1500, 1000).wait()
 
-		heading = 88
+		direction = random.choice(-1,1)
+
+		heading = 88 * direction
 		angle = gy.value()
 
 		while heading != angle:
@@ -99,8 +108,5 @@ while True:
 
 		distance = ir.value()
 		j += 1
-	
-	else:
-		break
 
 	Sound.tone(1000, 1000).wait()
