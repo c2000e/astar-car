@@ -16,6 +16,7 @@ motors = [LargeMotor(address) for address in (OUTPUT_B, OUTPUT_C)]
 assert all([m.connected for m in motors]), "Connect motors to B & C"
 
 base_speed = -540
+min_distance = 70
 
 def run():
 	for m in motors:
@@ -68,7 +69,7 @@ distance = ir.value()
 heading = 0
 j = 0
 while True:
-	while distance > 50:			
+	while distance > min_distance:			
 		correct()
 		run()
 
@@ -83,12 +84,12 @@ while True:
 
 	distance = ir.value()
 
-	if distance < 50:
+	if distance < min_distance:
 		Sound.tone(1500, 1000).wait()
 
 		direction = random.choice((-1,1))
 
-		heading = 88 * direction
+		heading = 90 * direction
 		angle = gy.value()
 
 		while heading != angle:
