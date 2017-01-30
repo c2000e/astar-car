@@ -58,7 +58,7 @@ def turn():
 				m.speed_sp = -base_speed/3
 			i += 1
 
-Sound.play("sounds/XP Startup.wav").wait()
+Sound.play("/Programs/astar-car/sounds/XP Startup.wav").wait()
 
 distance = ir.value()
 heading = 0
@@ -70,7 +70,7 @@ while True:
 
 		distance = ir.value()
 
-	Sound.play("sounds/Uh Oh.wav").wait()
+	Sound.play("/Programs/astar-car/sounds/Uh Oh.wav").wait()
 
 	if j < 10:
 		heading = 88
@@ -100,4 +100,4 @@ while True:
 	
 		break
 
-	Sound.play("sounds/Wee.wav").wait()
+	Sound.play("/Programs/astar-car/sounds/Wee.wav").wait()
