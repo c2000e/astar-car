@@ -25,8 +25,8 @@ def correct():
 	error = heading - angle 
 	percent_error = error/25
 
-	if percent_error > 2/3:
-		percent_error = 2/3
+	if percent_error > (-900-base_speed)/base_speed:
+		percent_error = (-900-base_speed)/base_speed
 
 	i = 0
 	for m in motors:
@@ -78,17 +78,15 @@ while True:
 			angle = gy.value()
 			turn()
 			run()
-		
-		while heading != angle:
-			angle = gy.value()
-			turn()
-			run()
 
 		for m in motors:
 			m.stop(stop_action = "hold")
+		
 		gy.mode = "GYRO-RATE"
 		gy.mode = "GYRO-ANG"
+		
 		heading = 0
+		
 		time.sleep(3)		
 
 		distance = ir.value()
