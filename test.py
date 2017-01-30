@@ -17,6 +17,7 @@ assert all([m.connected for m in motors]), "Connect motors to B & C"
 
 base_speed = -540
 min_distance = 70
+random = True
 
 def run():
 	for m in motors:
@@ -91,9 +92,12 @@ while True:
 	if distance < min_distance:
 		Sound.tone(1500, 1000).wait()
 
-		direction = random.choice((-1,1))
+		if random = True:
+			direction = random.choice((-1,1))
+		else:
+			direction = 1
 
-		heading = 90 * direction
+		heading = 88 * direction
 		angle = gy.value()
 
 		while heading != angle:
