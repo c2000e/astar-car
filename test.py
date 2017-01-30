@@ -86,7 +86,7 @@ while True:
 	if distance < 50:
 		Sound.tone(1500, 1000).wait()
 
-		direction = random.choice(-1,1)
+		direction = random.choice((-1,1))
 
 		heading = 88 * direction
 		angle = gy.value()
