@@ -19,7 +19,6 @@ assert all([m.connected for m in motors]), "Connect motors to B & C"
 
 lcd = Screen()
 
-smile = True
 base_speed = -540
 min_distance = 70
 random = False
@@ -82,6 +81,8 @@ def draw(smile):
 	
 	else:
 		lcd.draw.arc((20, 80, 158, 100), 0, 180)
+
+	lcd.update()
 
 Sound.tone([(1500, 500, 100), (1000, 500)]).wait()
 
