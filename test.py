@@ -17,7 +17,7 @@ assert all([m.connected for m in motors]), "Connect motors to B & C"
 
 base_speed = -540
 min_distance = 70
-random = True
+random_mode = True
 
 def run():
 	for m in motors:
@@ -25,9 +25,6 @@ def run():
 
 def correct():
 	angle = gy.value()
-	
-	while raw_angle > 360:
-		raw_angle -= 360
 
 	error = heading - angle 
 	percent_error = error/25
@@ -46,16 +43,16 @@ def correct():
 			m.speed_sp = base_speed + (base_speed * percent_error)
 		i += 1
 
-def turn():
+def turn(speed_reduction):
 	angle = gy.value()
 	
 	if angle < heading:
 		i = 0
 		for m in motors:
 			if i == 0:
-				m.speed_sp = -base_speed/3
+				m.speed_sp = -base_speed/speed_reduction
 			else:
-				m.speed_sp = base_speed/3
+				m.speed_sp = base_speed/speed_reduction
 	
 			i += 1
 
@@ -63,9 +60,9 @@ def turn():
 		i = 0
 		for m in motors:
 			if i == 0:
-				m.speed_sp = base_speed/3
+				m.speed_sp = base_speed/speed_reduction
 			else:
-				m.speed_sp = -base_speed/3
+				m.speed_sp = -base_speed/speed_reduction
 			i += 1
 
 Sound.tone([(1500, 500, 100), (1000, 500)]).wait()
@@ -92,19 +89,29 @@ while True:
 	if distance < min_distance:
 		Sound.tone(1500, 1000).wait()
 
-		if random = True:
+		if random_mode == True:
 			direction = random.choice((-1,1))
 		else:
 			direction = 1
 
-		heading = 88 * direction
+		heading = 90 * direction
 		angle = gy.value()
 
 		while heading != angle:
 			angle = gy.value()
-			turn()
+			turn(3)
 			run()
 
+		for m in motors:
+			m.stop(stop_action = "hold")
+
+		time.sleep(3)
+
+		while heading != angle:
+			angle = gy.value()
+			turn(20)
+			run()
+		
 		for m in motors:
 			m.stop(stop_action = "hold")
 		
