@@ -3,6 +3,8 @@ from ev3dev.ev3 import *
 import time
 import random
 
+Leds.all_off()
+
 ir = InfraredSensor()
 assert ir.connected, "Connect ultrasound sensor"
 ir.mode = "IR-PROX"
@@ -15,6 +17,9 @@ gy.mode = "GYRO-ANG"
 motors = [LargeMotor(address) for address in (OUTPUT_B, OUTPUT_C)]
 assert all([m.connected for m in motors]), "Connect motors to B & C"
 
+lcd = Screen()
+
+smile = True
 base_speed = -540
 min_distance = 70
 random = True
@@ -68,20 +73,41 @@ def turn():
 				m.speed_sp = -base_speed/3
 			i += 1
 
+def draw(smile):
+	lcd.clear()
+
+	lcd.draw.ellipse((20, 20, 60, 60))
+	lcd.draw.ellipse((118, 20, 158, 60))
+
+	if smile:
+		lcd.draw.arc((20, 80, 158, 100), 0, 180)
+	
+	else:
+		lcd.draw.arc((20, 80, 158, 100), 0, 180)
+
 Sound.tone([(1500, 500, 100), (1000, 500)]).wait()
 
 distance = ir.value()
 heading = 0
 j = 0
 while True:
-	while distance > min_distance:			
+	while distance > min_distance:
 		correct()
 		run()
 
 		distance = ir.value()
 
+		smile = True
+		draw(smile)
+
 	for m in motors:
 		m.stop(stop_action = "hold")
+
+	smile = False
+	draw(smile)
+
+	Leds.set_color(Leds.LEFT, Leds.RED)
+	Leds.set_color(Leds.RIGHT, Leds.RED)
 
 	Sound.tone(1500, 1000).wait()
 
@@ -90,9 +116,10 @@ while True:
 	distance = ir.value()
 
 	if distance < min_distance:
+
 		Sound.tone(1500, 1000).wait()
 
-		if random = True:
+		if random == True:
 			direction = random.choice((-1,1))
 		else:
 			direction = 1
@@ -118,4 +145,7 @@ while True:
 		distance = ir.value()
 		j += 1
 
+	Leds.set_color(Leds.LEFT, Leds.GREEN)
+	Leds.set_color(Leds.RIGHT, Leds.GREEN)
+		
 	Sound.tone(1000, 1000).wait()
