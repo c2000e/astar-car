@@ -22,6 +22,7 @@ lcd = Screen()
 base_speed = -540
 min_distance = 70
 random = False
+smile = True
 
 def run():
 	for m in motors:
@@ -80,9 +81,14 @@ def draw(smile):
 		lcd.draw.arc((20, 80, 158, 100), 0, 180)
 	
 	else:
-		lcd.draw.arc((20, 80, 158, 100), 0, 180)
+		lcd.draw.arc((20, 80, 158, 100), 180, 360)
 
 	lcd.update()
+
+draw(smile)
+
+Leds.set_color(Leds.LEFT, Leds.GREEN)
+Leds.set_color(Leds.RIGHT, Leds.GREEN)
 
 Sound.tone([(1500, 500, 100), (1000, 500)]).wait()
 
