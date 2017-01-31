@@ -17,7 +17,7 @@ assert all([m.connected for m in motors]), "Connect motors to B & C"
 
 base_speed = -540
 min_distance = 70
-random_mode = True
+random_mode = False
 
 def run():
 	for m in motors:
@@ -94,27 +94,17 @@ while True:
 		else:
 			direction = 1
 
-		heading = 90 * direction
+		heading += 90 * direction
 		angle = gy.value()
-
-		while heading != angle:
-			angle = gy.value()
-			turn(3)
-			run()
-
-		for m in motors:
-			m.stop(stop_action = "hold")
-
-		time.sleep(3)
 
 		while heading != angle:
 			angle = gy.value()
 			turn(20)
 			run()
-		
+
 		for m in motors:
 			m.stop(stop_action = "hold")
-		
+	
 		gy.mode = "GYRO-RATE"
 		gy.mode = "GYRO-ANG"
 		
