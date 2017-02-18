@@ -3,116 +3,127 @@ from ev3dev.ev3 import *
 import time
 import random
 
-Leds.all_off()
-
+#
 ir = InfraredSensor()
+gy = GyroSensor()
+l_motor = LargeMotor(OUTPUT_B)
+r_motor = LargeMotor(OUTPUT_C)
+LCD_screen = Screen()
+
+#Checks that all devices are connected to the ev3.
 assert ir.connected, "Connect ultrasound sensor"
+assert gy.connected, "Connect gyro sensor"
+assert l_motor.connected, "Connect motor to B"
+assert r_motor.connected, "Connect motor to C"
+
+#
 ir.mode = "IR-PROX"
 
-gy = GyroSensor()
-assert gy.connected, "Connect gyro sensor"
-gy.mode = "GYRO-RATE"
-gy.mode = "GYRO-ANG"
-
-motors = [LargeMotor(address) for address in (OUTPUT_B, OUTPUT_C)]
-assert all([m.connected for m in motors]), "Connect motors to B & C"
-
-lcd = Screen()
-
+#
 base_speed = -540
+#
+max_speed = -900
+#
+turn_speed_reduction = 0.05
+
+#
+distance = ir.value()
+#
 min_distance = 70
+
+#
+heading = 0
+
+#
 random = False
-smile = True
+#
+canSee = True
 
-def run():
-	for m in motors:
-		m.run_forever()
+#
+def run_motors():
+	l_motor.run_forever()
+	r_motor.run_forever()
 
-def correct():
+#
+def stop_motors():
+	l_motor.stop(stop_action = "hold")
+	r_motor.stop(stop_action = "hold")
+
+#
+def calibrate_gyro():
+	gy.mode = "GYRO-RATE"
+	gy.mode = "GYRO-ANG"
+
+	time.sleep(4)
+
 	angle = gy.value()
-	
 
-	error = heading - angle 
-	percent_error = error/25
+#
+def correct_drift():
+	scaled_error = (heading - angle)/25
+	max_error = (max_speed / base_speed) - 1:
 
-	if percent_error < (900/base_speed) + 1:
-		percent_error = (900/base_speed) + 1
 
-	elif percent_error > (-900/base_speed) - 1:
-		percent_error = (-900/base_speed) - 1
+	if scaled_error < -max_error:
+		scaled_error = -max_error
 
-	i = 0
-	for m in motors:
-		if i == 0:
-			m.speed_sp = base_speed - (base_speed * percent_error)
-		else:
-			m.speed_sp = base_speed + (base_speed * percent_error)
-		i += 1
+	elif scaled_error > max_error:
+		scaled_error = max_error
 
+	l_motor.speed_sp = base_speed - (base_speed * scaled_error)
+	r_motor.speed_sp = base_speed + (base_speed * scaled_error)
+
+#
 def turn(speed_reduction):
-	angle = gy.value()
-	
 	if angle < heading:
-		i = 0
-		for m in motors:
-			if i == 0:
-				m.speed_sp = -base_speed/speed_reduction
-			else:
-				m.speed_sp = base_speed/speed_reduction
+		m.speed_sp = -base_speed * speed_reduction
+		m.speed_sp = base_speed * speed_reduction
 	
-			i += 1
-
 	if angle > heading:
-		i = 0
-		for m in motors:
-			if i == 0:
-				m.speed_sp = base_speed/speed_reduction
-			else:
-				m.speed_sp = -base_speed/speed_reduction
-			i += 1
+		m.speed_sp = base_speed * speed_reduction
+		m.speed_sp = -base_speed * speed_reduction
+		
+#
+def update_visuals():
+	LCD_screen.clear()
 
-def draw(smile):
-	lcd.clear()
+	LCD_screen.draw.ellipse((20, 20, 60, 60))
+	LCD_screen.draw.ellipse((118, 20, 158, 60))
 
-	lcd.draw.ellipse((20, 20, 60, 60))
-	lcd.draw.ellipse((118, 20, 158, 60))
-
-	if smile:
-		lcd.draw.arc((20, 80, 158, 100), 0, 180)
+	if canSee:
+		LCD_screen.draw.arc((20, 80, 158, 100), 0, 180)
+		
+		Leds.set_color(Leds.LEFT, Leds.GREEN)
+		Leds.set_color(Leds.RIGHT, Leds.GREEN)
 	
 	else:
-		lcd.draw.arc((20, 80, 158, 100), 180, 360)
+		LCD_screen.draw.arc((20, 80, 158, 100), 180, 360)
+
+		Leds.set_color(Leds.LEFT, Leds.RED)
+		Leds.set_color(Leds.RIGHT, Leds.RED)
 
 	lcd.update()
 
-draw(smile)
 
-Leds.set_color(Leds.LEFT, Leds.GREEN)
-Leds.set_color(Leds.RIGHT, Leds.GREEN)
+calibrate_gyro()
 
-Sound.tone([(1500, 500, 100), (1000, 500)]).wait()
+update_visuals()
 
-distance = ir.value()
-heading = 0
-j = 0
+Sound.tone([(1500, 500, 100), (1000, 500, 0)]).wait()
+
+
 while True:
 	while distance > min_distance:
-		correct()
-		run()
+		correct_drift()
+		run_motors()
 
+		angle = gy.value()
 		distance = ir.value()
 
-		smile = True
-		draw(smile)
+	stop_motors()
 
-	for m in motors:
-		m.stop(stop_action = "hold")
-
-	smile = False
-	draw(smile)
-
-	Leds.set_color(Leds.LEFT, Leds.RED)
-	Leds.set_color(Leds.RIGHT, Leds.RED)
+	canSee = False
+	update_visuals()
 
 	Sound.tone(1500, 1000).wait()
 
@@ -123,34 +134,24 @@ while True:
 	if distance < min_distance:
 		Sound.tone(1500, 1000).wait()
 
-		if random == True:
-			direction = random.choice((-1,1))
-		
-		else:
-			direction = 1
+		direction = 1
 
-		heading += 90 * direction
+		heading = 90 * direction
 		angle = gy.value()
 
 		while heading != angle:
+			turn(turn_speed_reduction, angle)
+			run_motors()
 			angle = gy.value()
-			turn(20)
-			run()
 
-		for m in motors:
-			m.stop(stop_action = "hold")
-		
-		gy.mode = "GYRO-RATE"
-		gy.mode = "GYRO-ANG"
+		stop_motors()
+		calibrate_gyro()
 		
 		heading = 0
-		
-		time.sleep(3)		
 
 		distance = ir.value()
-		j += 1
 
-	Leds.set_color(Leds.LEFT, Leds.GREEN)
-	Leds.set_color(Leds.RIGHT, Leds.GREEN)
-		
+	canSee = True
+	update_visuals()
+
 	Sound.tone(1000, 1000).wait()
