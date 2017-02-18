@@ -8,12 +8,10 @@ assert cl.connected, "Connect color sensor"
 ts = TouchSensor()
 assert ts.connected, "Connect touch sensor"
 
-cl.mode = "COL-COLOR"
-
-colors = ("unknown", "black", "blue", "green", "yellow", "red", "white", "brown")
+cl.mode = "COL-REFLECT"
 
 while not ts.value():
-	print(colors[cl.value()])
+	print(cl.value())
 	sleep(1)
 
 Sound.beep()
