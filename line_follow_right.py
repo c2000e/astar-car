@@ -18,7 +18,7 @@ error_scale = 1.15
 # by a white line.
 # 1 = Left side of black line
 # -1 = Right side of black line
-direction = 1
+direction = -1
 
 
 # Initializes color sensor and ensures it is connected.
