@@ -6,43 +6,50 @@ from time import sleep
 cl = ColorSensor()
 assert cl.connected, "Connect color sensor"
 
+ir = InfraredSensor()
+assert ir.connected, "Connect IR sensor"
+
 ts = TouchSensor()
 assert ts.connected, "Connect touch sensor"
 
-l_motor = LargeMotor(OUTPUT_C)
-r_motor = LargeMotor(OUTPUT_B)
+l_motor = LargeMotor(OUTPUT_B)
+r_motor = LargeMotor(OUTPUT_C)
 
 cl.mode = "COL-REFLECT"
+ir.mode = "IR-PROX"
 
+base_speed = 180
 
-base_speed = 540
-max_speed = 900
+target_reflection = 35
 
-white = 56
-black = 5
+error_scale = 1.15
 
-error_scale = 0.25
-
+direction = 1
 
 def run_motors():
 	l_motor.run_forever()
 	r_motor.run_forever()
 
-
 def stop_motors():
 	l_motor.stop(stop_action = "hold")
 	r_motor.stop(stop_action = "hold")
 
+def follow_line():
+	error = (target_reflection - cl.value()) * error_scale
 
-def correct_drift():
-	left_error = (white - cl.value()) * error_scale
-	right_error = (cl.value() - black) * error_scale
+	l_speed = (-7.2 * error * direction) + base_speed
+	r_speed = (7.2 * error * direction) + base_speed
 
-	l_motor.speed_sp = base_speed - (base_speed * left_error)
-	r_motor.speed_sp = base_speed + (base_speed * right_error)
+	if l_speed > base_speed:
+		l_speed = base_speed
+	if r_speed > base_speed:
+		r_speed = base_speed
+	
+	l_motor.speed_sp = l_speed
+	r_motor.speed_sp = r_speed
 
-while not ts.value():
-	correct_drift()
+while not (ts.value() or ir.value() < 35):
+	follow_line()
 	run_motors()
 
 stop_motors()

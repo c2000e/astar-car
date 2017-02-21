@@ -1,0 +1,64 @@
+#!/usr/bin/env python3
+from ev3dev.ev3 import *
+from time import sleep
+
+
+cl = ColorSensor()
+assert cl.connected, "Connect color sensor"
+
+ts = TouchSensor()
+assert ts.connected, "Connect touch sensor"
+
+l_motor = LargeMotor(OUTPUT_B)
+r_motor = LargeMotor(OUTPUT_C)
+
+cl.mode = "COL-REFLECT"
+
+
+base_speed = 360
+max_speed = 900
+
+target_reflection = 35
+
+error_scale = 0.1
+integral_scale = 0
+derivative_scale = 0
+
+integral = 0
+last_error = 0
+recursive_values = (integral, last_error)
+
+
+def run_motors():
+	l_motor.run_forever()
+	r_motor.run_forever()
+
+def stop_motors():
+	l_motor.stop(stop_action = "hold")
+	r_motor.stop(stop_action = "hold")
+
+def correct_drift(integral, last_error):
+	error = target_reflection - cl.value()
+	s_error = error * error_scale
+
+	integral = integral +  error
+	s_integral = integral * integral_scale
+
+	s_derivative = (error - last_error) * derivative_scale
+
+	total_error = s_error + s_integral + s_derivative
+
+	print(base_speed - (base_speed * total_error))
+	#r_motor.speed_sp = base_speed + (base_speed * total_error)
+	
+	last_error = error
+
+	return(integral, last_error)
+
+while not ts.value():
+	recursive_values = correct_drift(recursive_values[0], recursive_values[1])
+	print(l_motor.speed_sp, r_motor.speed_sp)
+	run_motors()
+
+stop_motors()
+Sound.beep()
