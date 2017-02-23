@@ -16,18 +16,10 @@ LEFT = -90
 # Integer value between 0 and 1000 that limits the speed of the motors.
 max_speed = 360
 
-# 
-target_color = BLACK
-left_color = YELLOW
-right_color = WHITE
-
-# 
 adjustment = 0.05
 error = 0
 
 heading = 0
-
-last_color = 0
 
 turn_speed_reduction = 0.2
 
@@ -87,21 +79,15 @@ def stop_motors():
 
 def follow_road():
 	global error
-	global last_color
 
 	current_color = cl.value()
 
 	if current_color == RED:
-		#locate_node_center(last_color)
+		stop_motors()
+		time.sleep(1)
 		handle_node()
 
 	else:
-		#if current_color == BLACK:
-		#	if error > 0:
-		#		error -= adjustment
-		#	if error < 0:
-		#		error += adjustment	
-
 		if current_color == BLACK:
 			error -= adjustment
 
@@ -131,31 +117,16 @@ def follow_road():
 
 		run_motors()
 
-		last_color = current_color
-
 
 def handle_node():
-	#locate_node_center(last_color)
 	turn_direction = get_directions()
 	turn(turn_direction)
 	exit_node()
 
+
 def get_directions():
 	return(LEFT)
 
-def locate_node_center(last_color):
-	current_color = cl.value()
-
-	while current_color != BLACK:
-		if last_color == BLACK:
-			l_motor.speed_sp = 180
-			r_motor.speed_sp = 180
-
-		run_motors()
-
-		current_color = cl.value()
-
-	stop_motors()
 
 def turn(turn_direction):
 	global heading
@@ -177,6 +148,7 @@ def turn(turn_direction):
 
 	stop_motors()
 
+
 def exit_node():
 	current_color = cl.value()
 
@@ -189,10 +161,11 @@ def exit_node():
 
 	stop_motors()
 
+
 calibrate_gyro()
 
 # Runs only while the touch sensor is not activated and the infrared sensor doesn't detect anything within approximately 35 cm.
-while not ts.value(): #or ir.value() < 50):
+while not ts.value():
 	follow_road()
 
 # Stops the robot and notifies the user with a beep.
