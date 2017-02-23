@@ -102,7 +102,7 @@ def follow_road():
 		#	if error < 0:
 		#		error += adjustment	
 
-		elif current_color == BLACK:
+		if current_color == BLACK:
 			error -= adjustment
 
 		elif current_color == WHITE:
@@ -178,17 +178,14 @@ def turn(turn_direction):
 	stop_motors()
 
 def exit_node():
-	while current_color != RED:
-		l_motor.speed_sp = 30
-		r_motor.speed_sp = 30
+	current_color = cl.value()
+
+	while current_color != (BLACK or WHITE):
+		l_motor.speed_sp = 180
+		r_motor.speed_sp = 180
 
 		run_motors()
-
-	while current_color != BLACK:
-		l_motor.speed_sp = 30
-		r_motor.speed_sp = 30
-
-		run_motors()
+		current_color = cl.value()
 
 	stop_motors()
 
