@@ -3,6 +3,14 @@ from ev3dev.ev3 import *
 from time import sleep
 
 
+UNKNOWN = 0
+BLACK = 1
+YELLOW = 4
+RED = 5
+WHITE = 6
+BROWN = 7
+
+
 # Integer value between 0 and 1000 that limits the speed of the motors.
 max_speed = 180
 
@@ -10,9 +18,15 @@ max_speed = 180
 # 35 is the approximate reflection value above the intersection of a white and black line.
 target_reflection = 35
 
+target_color = BLACK
+left_color = YELLOW
+right_color = WHITE
+
 # Float value greater than 0 that determines how severely the robot reacts to error.
 # Larger values cause larger corrections.
 error_scale = 1.15
+adjustment = 0.05
+error = 0
 
 # Boolean value (1 or -1) that determines whether the robot attempts to stay on the left or right side of a black line bordered
 # by a white line.
@@ -42,7 +56,7 @@ assert r_motor.connected, "Connect right motor to port C"
 
 
 # Sets color sensor to measure reflection intensity.
-cl.mode = "COL-REFLECT"
+cl.mode = "COL-COLOR"
 
 # Sets infrared sensor to measure proximity on a scale of 0% - 100%.
 # 0% is equivalent to 0 cm and 100% is approximately 70 cm.
@@ -62,10 +76,52 @@ def stop_motors():
 
 
 # Changes the speed of the motors to make the robot follow a line.
+
+def drive():
+	global error
+
+	current_color = cl.value()
+
+	if current_color == BLACK:
+		if error > 0:
+			error -= adjustment
+		if error < 0:
+			error += adjustment	
+
+	elif current_color == YELLOW:
+		error += adjustment
+
+	elif current_color == WHITE:
+		error -= adjustment
+	
+	if error > 1:
+		error = 1
+	elif error < -1:
+		error = -1
+
+	left_motor_speed = (-1 * max_speed * error) + max_speed
+	right_motor_speed = (max_speed * error) + max_speed
+
+	if left_motor_speed > max_speed:
+		left_motor_speed = max_speed
+	elif left_motor_speed < -max_speed:
+		left_motor_speed = -max_speed
+
+	if right_motor_speed > max_speed:
+		right_motor_speed = max_speed
+	elif right_motor_speed < -max_speed:
+		right_motor_speed = -max_speed
+
+	l_motor.speed_sp = left_motor_speed
+	r_motor.speed_sp = right_motor_speed
+
+
 def follow_line():
 	# Calculates error based on a target reflection value and actual reflection value.
 	# This value is multiplied by a float (error_scale) that allows adjustment of how severely the robot reacts to errors.
 	error = (target_reflection - cl.value()) * error_scale
+
+	
 
 	# Modeled after ev3 steering function; y = (7.2 * Steering) + Power.
 	# "Steering" becomes "error" and "Power" becomes max_speed.
@@ -85,8 +141,9 @@ def follow_line():
 
 
 # Runs only while the touch sensor is not activated and the infrared sensor doesn't detect anything within approximately 35 cm.
-while not (ts.value() or ir.value() < 50):
-	follow_line()
+while not ts.value(): #or ir.value() < 50):
+	#follow_line()
+	drive()
 	run_motors()
 
 # Stops the robot and notifies the user with a beep.
