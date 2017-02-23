@@ -108,10 +108,10 @@ def follow_road():
 		elif current_color == WHITE:
 			error -= adjustment
 		
-		if error > 1:
-			error = 1
-		elif error < -1:
-			error = -1
+		if error > 0.5:
+			error = 0.5
+		elif error < -0.5:
+			error = -0.5
 
 		left_motor_speed = (-1 * max_speed * error) + max_speed
 		right_motor_speed = (max_speed * error) + max_speed
