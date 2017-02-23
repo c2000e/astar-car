@@ -92,9 +92,8 @@ def follow_road():
 	current_color = cl.value()
 
 	if current_color == RED:
-		stop_motors()
-		locate_node_center(last_color)
-		#handle_node(last_color)
+		#locate_node_center(last_color)
+		handle_node()
 
 	else:
 		#if current_color == BLACK:
@@ -104,15 +103,15 @@ def follow_road():
 		#		error += adjustment	
 
 		elif current_color == BLACK:
-			error += adjustment
+			error -= adjustment
 
 		elif current_color == WHITE:
-			error -= adjustment
+			error += adjustment
 		
-		if error > 0.25:
-			error = 0.25
-		elif error < -0.25:
-			error = -0.25
+		if error > 0.15:
+			error = 0.15
+		elif error < -0.15:
+			error = -0.15
 
 		left_motor_speed = (-1 * max_speed * error) + max_speed
 		right_motor_speed = (max_speed * error) + max_speed
@@ -135,8 +134,8 @@ def follow_road():
 		last_color = current_color
 
 
-def handle_node(last_color):
-	locate_node_center(last_color)
+def handle_node():
+	#locate_node_center(last_color)
 	turn_direction = get_directions()
 	turn(turn_direction)
 	exit_node()
