@@ -10,11 +10,11 @@ RED = 5
 WHITE = 6
 BROWN = 7
 
-LEFT = 90
+LEFT = -90
 
 
 # Integer value between 0 and 1000 that limits the speed of the motors.
-max_speed = 180
+max_speed = 360
 
 # 
 target_color = BLACK
@@ -93,7 +93,7 @@ def follow_road():
 
 	if current_color == RED:
 		stop_motors()
-		handle_node(last_color)
+		#handle_node(last_color)
 
 	else:
 		if current_color == BLACK:
