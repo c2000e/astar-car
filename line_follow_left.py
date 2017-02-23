@@ -97,13 +97,13 @@ def follow_road():
 		#handle_node(last_color)
 
 	else:
-		if current_color == BLACK:
-			if error > 0:
-				error -= adjustment
-			if error < 0:
-				error += adjustment	
+		#if current_color == BLACK:
+		#	if error > 0:
+		#		error -= adjustment
+		#	if error < 0:
+		#		error += adjustment	
 
-		elif current_color == YELLOW:
+		elif current_color == BLACK:
 			error += adjustment
 
 		elif current_color == WHITE:
