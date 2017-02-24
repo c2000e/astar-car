@@ -75,7 +75,9 @@ def stop_motors():
 
 
 # Changes the speed of the motors to make the robot follow a line.
-def follow_road(error):
+def follow_road():
+	global error
+
 	current_color = cl.value()
 
 	if current_color == RED:
@@ -112,8 +114,6 @@ def follow_road(error):
 		r_motor.speed_sp = right_motor_speed
 
 		run_motors()
-
-		return(error)
 
 
 def handle_node():
