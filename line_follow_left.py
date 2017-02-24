@@ -7,13 +7,13 @@ from time import sleep
 BLACK = 1
 #YELLOW = 4
 RED = 5
-WHITE = 60
+WHITE = 6
 
 LEFT = -90
 
 
 # Integer value between 0 and 1000 that limits the speed of the motors.
-max_speed = 360
+max_speed = 540
 
 adjustment = 0.05
 error = 0
@@ -75,14 +75,12 @@ def stop_motors():
 
 
 # Changes the speed of the motors to make the robot follow a line.
-def follow_road():
-	global error
-
+def follow_road(error):
 	current_color = cl.value()
 
 	if current_color == RED:
-		#stop_motors()
-		#handle_node()
+		stop_motors()
+		handle_node()
 		print("RED!")
 
 	else:
@@ -114,6 +112,8 @@ def follow_road():
 		r_motor.speed_sp = right_motor_speed
 
 		run_motors()
+
+		return(error)
 
 
 def handle_node():
