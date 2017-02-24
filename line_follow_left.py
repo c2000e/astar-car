@@ -79,8 +79,9 @@ def follow_road(error):
 	current_color = cl.value()
 
 	if current_color == RED:
-		stop_motors()
-		handle_node()
+		#stop_motors()
+		#handle_node()
+		print("RED!")
 
 	else:
 		if current_color == BLACK:
