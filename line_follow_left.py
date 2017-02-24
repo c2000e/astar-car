@@ -3,25 +3,24 @@ from ev3dev.ev3 import *
 from time import sleep
 
 
-UNKNOWN = 0
+#UNKNOWN = 0
 BLACK = 1
-YELLOW = 4
+#YELLOW = 4
 RED = 5
-WHITE = 6
-BROWN = 7
+WHITE = 60
 
 LEFT = -90
 
 
 # Integer value between 0 and 1000 that limits the speed of the motors.
-max_speed = 360
+max_speed = 540
 
 adjustment = 0.05
 error = 0
 
 heading = 0
 
-turn_speed_reduction = 0.2
+turn_speed_reduction = 0.05
 
 
 # Initializes color sensor and ensures it is connected.
@@ -76,15 +75,11 @@ def stop_motors():
 
 
 # Changes the speed of the motors to make the robot follow a line.
-
-def follow_road():
-	global error
-
+def follow_road(error):
 	current_color = cl.value()
 
 	if current_color == RED:
 		stop_motors()
-		time.sleep(1)
 		handle_node()
 
 	else:
@@ -117,10 +112,15 @@ def follow_road():
 
 		run_motors()
 
+		return(error)
+
 
 def handle_node():
+	print("Handle Node 1")
 	turn_direction = get_directions()
+	print("Handle Node 2")
 	turn(turn_direction)
+	print("Handle Node 3")
 	exit_node()
 
 
@@ -129,13 +129,14 @@ def get_directions():
 
 
 def turn(turn_direction):
-	global heading
+	print("Preparing to turn")
 
-	heading += turn_direction
+	heading = turn_direction
 
 	angle = gr.value()
 
 	while angle != heading:
+		print("Turning")
 		if angle < heading:
 			l_motor.speed_sp = -max_speed * turn_speed_reduction
 			r_motor.speed_sp = max_speed * turn_speed_reduction
@@ -147,12 +148,15 @@ def turn(turn_direction):
 		angle = gr.value()
 
 	stop_motors()
+	calibrate_gyro()
 
 
 def exit_node():
+	print("Preparing to exit")
 	current_color = cl.value()
 
 	while current_color != (BLACK or WHITE):
+		print("Exiting")
 		l_motor.speed_sp = 180
 		r_motor.speed_sp = 180
 
@@ -166,7 +170,7 @@ calibrate_gyro()
 
 # Runs only while the touch sensor is not activated and the infrared sensor doesn't detect anything within approximately 35 cm.
 while not ts.value():
-	follow_road()
+	error = follow_road(error)
 
 # Stops the robot and notifies the user with a beep.
 stop_motors()
