@@ -13,7 +13,7 @@ LEFT = -90
 
 
 # Integer value between 0 and 1000 that limits the speed of the motors.
-max_speed = 540
+max_speed = 360
 
 adjustment = 0.05
 error = 0
