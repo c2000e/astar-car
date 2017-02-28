@@ -2,15 +2,21 @@
 from ev3dev.ev3 import *
 from time import sleep
 
+from random import choice
 
-#UNKNOWN = 0
+
+UNKNOWN = 0
 BLACK = 1
-#YELLOW = 4
 RED = 5
 WHITE = 6
 
-LEFT = -90
+COLORS = [UNKNOWN, BLACK, RED, WHITE]
 
+RIGHT = 90
+LEFT = -90
+STRAIGHT = 0
+
+DIRECTIONS = [RIGHT, STRAIGHT]
 
 # Integer value between 0 and 1000 that limits the speed of the motors.
 max_speed = 540
@@ -21,6 +27,8 @@ error = 0
 heading = 0
 
 turn_speed_reduction = 0.05
+
+black_side = 1
 
 
 # Initializes color sensor and ensures it is connected.
@@ -59,7 +67,7 @@ ir.mode = "IR-PROX"
 def calibrate_gyro():
 	gr.mode = "GYRO-RATE"
 	gr.mode = "GYRO-ANG"
-	time.sleep(4)
+	sleep(4)
 
 
 # Runs the motors until stopped while also allowing easy adjustment of speed.
@@ -73,105 +81,105 @@ def stop_motors():
 	l_motor.stop(stop_action = "hold")
 	r_motor.stop(stop_action = "hold")
 
+	l_motor.speed_sp = 0
+	r_motor.speed_sp = 0
+
+def detect_objects():
+	if (ts.value() or ir.value() < 50):
+		return True
+
+	
+
 
 # Changes the speed of the motors to make the robot follow a line.
-def follow_road(error):
+def follow_road():
+	global error
+	global black_side
+
 	current_color = cl.value()
+	while not detect_objects():
+		if (current_color != RED) and (current_color in COLORS):
+			if current_color == BLACK:
+				error -= adjustment
 
-	if current_color == RED:
-		stop_motors()
-		handle_node()
-		print("RED!")
-
-	else:
-		if current_color == BLACK:
-			error -= adjustment
-
-		elif current_color == WHITE:
-			error += adjustment
+			elif current_color == WHITE:
+				error += adjustment
 		
-		if error > 0.15:
-			error = 0.15
-		elif error < -0.15:
-			error = -0.15
+			if error > 0.15:
+				error = 0.15
+			elif error < -0.15:
+				error = -0.15
 
-		left_motor_speed = (-1 * max_speed * error) + max_speed
-		right_motor_speed = (max_speed * error) + max_speed
+			left_motor_speed = (-1 * max_speed * error * black_side) + max_speed
+			right_motor_speed = (max_speed * error * black_side) + max_speed
 
-		if left_motor_speed > max_speed:
-			left_motor_speed = max_speed
-		elif left_motor_speed < -max_speed:
-			left_motor_speed = -max_speed
+			if left_motor_speed > max_speed:
+				left_motor_speed = max_speed
+			elif left_motor_speed < -max_speed:
+				left_motor_speed = -max_speed
 
-		if right_motor_speed > max_speed:
-			right_motor_speed = max_speed
-		elif right_motor_speed < -max_speed:
-			right_motor_speed = -max_speed
+			if right_motor_speed > max_speed:
+				right_motor_speed = max_speed
+			elif right_motor_speed < -max_speed:
+				right_motor_speed = -max_speed
 
-		l_motor.speed_sp = left_motor_speed
-		r_motor.speed_sp = right_motor_speed
+			l_motor.speed_sp = left_motor_speed
+			r_motor.speed_sp = right_motor_speed
 
-		run_motors()
+			run_motors()
+	
+		elif current_color == RED:
+			stop_motors()
+			handle_node()
 
-		return(error)
+		else:
+			stop_motors()
 
 
 def handle_node():
-	print("Handle Node 1")
 	turn_direction = get_directions()
-	print("Handle Node 2")
-	turn(turn_direction)
-	print("Handle Node 3")
+
+	if turn_direction != STRAIGHT:
+		turn(turn_direction)
+
 	exit_node()
 
 
 def get_directions():
-	return(LEFT)
+	global black_side
+
+	turn_direction = choice(DIRECTIONS)
+	
+	if turn_direction == STRAIGHT:
+		black_side *= -1
+
+	return(turn_direction)
 
 
 def turn(turn_direction):
-	print("Preparing to turn")
-
 	heading = turn_direction
 
 	angle = gr.value()
 
-	while angle != heading:
-		print("Turning")
+	while (angle != heading) and (not detect_objects()):
 		if angle < heading:
-			l_motor.speed_sp = -max_speed * turn_speed_reduction
-			r_motor.speed_sp = max_speed * turn_speed_reduction
+			l_motor.speed_sp = max_speed * turn_speed_reduction
 	
 		if angle > heading:
-			l_motor.speed_sp = max_speed * turn_speed_reduction
-			r_motor.speed_sp = -max_speed * turn_speed_reduction
-
+			r_motor.speed_sp = max_speed * turn_speed_reduction
+		
+		run_motors()
 		angle = gr.value()
 
 	stop_motors()
 	calibrate_gyro()
 
 
-def exit_node():
-	print("Preparing to exit")
-	current_color = cl.value()
-
-	while current_color != (BLACK or WHITE):
-		print("Exiting")
-		l_motor.speed_sp = 180
-		r_motor.speed_sp = 180
-
-		run_motors()
-		current_color = cl.value()
-
-	stop_motors()
-
-
 calibrate_gyro()
 
 # Runs only while the touch sensor is not activated and the infrared sensor doesn't detect anything within approximately 35 cm.
 while not ts.value():
-	error = follow_road(error)
+	follow_road()
 
 # Stops the robot and notifies the user with a beep.
 stop_motors()
