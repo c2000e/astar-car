@@ -4,7 +4,7 @@ from time import sleep
 
 from random import choice
 
-# Constants for colors that should be recognized by the program
+
 UNKNOWN = 0
 BLACK = 1
 RED = 5
@@ -12,31 +12,22 @@ WHITE = 6
 
 COLORS = [UNKNOWN, BLACK, RED, WHITE]
 
-
-# Constants for possible directions that the robot may turn.
 RIGHT = 90
 LEFT = -90
 STRAIGHT = 0
 
-DIRECTIONS = [RIGHT]
-
+AIGHT]
 
 # Integer value between 0 and 1000 that limits the speed of the motors.
 max_speed = 540
 
-# Float value that is used to keep track of how far off track the robot is.
+adjustment = 0.05
 error = 0
 
-# Float value that determines how severely the robot reacts to being in the wrong location.
-adjustment = 0.05
-
-# Integer value that the robot tries to match with its gyroscope reading during turns.
 heading = 0
 
-# Float value that is muliplied by the robot's max speed to slow down the robot during turns to increase accuracy.
 turn_speed_reduction = 0.05
 
-# Boolean value (1 or -1) that decides whether the robot should expect black to be on the left or right side of the robot's center.
 black_side = 1
 
 
@@ -56,7 +47,6 @@ assert ir.connected, "Connect IR sensor."
 ts = TouchSensor()
 assert ts.connected, "Connect touch sensor."
 
-
 # Initializes left and right motors and ensures they are connected.
 l_motor = LargeMotor(OUTPUT_B)
 assert l_motor.connected, "Connect left motor to port B."
@@ -73,7 +63,7 @@ cl.mode = "COL-COLOR"
 ir.mode = "IR-PROX"
 
 
-# Ensures that the gyro is oriented in the correct direction.
+#
 def calibrate_gyro():
 	gr.mode = "GYRO-RATE"
 	gr.mode = "GYRO-ANG"
@@ -101,13 +91,14 @@ def follow_road():
 	global black_side
 
 	current_color = cl.value()
+
 	if (current_color != RED) and (current_color in COLORS):
 		if current_color == BLACK:
 			error -= adjustment
 
 		elif current_color == WHITE:
 			error += adjustment
-	
+		
 		if error > 0.15:
 			error = 0.15
 		elif error < -0.15:
@@ -130,38 +121,24 @@ def follow_road():
 		r_motor.speed_sp = right_motor_speed
 
 		run_motors()
-
+	
 	elif current_color == RED:
+		stop_motors()
 		handle_node()
 
 	else:
-		handle_failure()
+		stop_motors()
 
 
 def handle_node():
-	stop_motors()
-
 	turn_direction = get_directions()
-
-	if turn_direction != STRAIGHT:
-		turn(turn_direction)
-
-	exit_node()
-
-
-def handle_failure():
-	stop_motors()
-
-
-def handle_success():
-	print("Success!")
+	turn(turn_direction)
 
 
 def get_directions():
 	global black_side
 
 	turn_direction = choice(DIRECTIONS)
-	
 	if turn_direction == STRAIGHT:
 		black_side *= -1
 
@@ -187,21 +164,10 @@ def turn(turn_direction):
 	calibrate_gyro()
 
 
-def exit_node():
-	current_color = cl.value()
-	while current_color == RED:
-		l_motor.speed_sp = max_speed * turn_speed_reduction
-		r_motor.speed_sp = max_speed * turn_speed_reduction
-
-		run_motors()
-
-		current_color = cl.value()
-
-
 calibrate_gyro()
 
 # Runs only while the touch sensor is not activated and the infrared sensor doesn't detect anything within approximately 35 cm.
-while (not ts.value() or ir.value < 50):
+while not ts.value():
 	follow_road()
 
 # Stops the robot and notifies the user with a beep.
