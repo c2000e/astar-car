@@ -14,7 +14,7 @@ COLORS = [UNKNOWN, BLACK, RED, WHITE]
 
 
 # Constants for possible directions that the robot may turn.
-RIGHT = 90
+RIGHT = 94
 LEFT = -90
 STRAIGHT = 0
 
@@ -34,7 +34,7 @@ adjustment = 0.05
 heading = 0
 
 # Float value that is muliplied by the robot's max speed to slow down the robot during turns to increase accuracy.
-turn_speed_reduction = 0.05
+turn_speed_reduction = 0.2
 
 # Boolean value (1 or -1) that decides whether the robot should expect black to be on the left or right side of the robot's center.
 black_side = 1
@@ -201,7 +201,7 @@ def exit_node():
 calibrate_gyro()
 
 # Runs only while the touch sensor is not activated and the infrared sensor doesn't detect anything within approximately 35 cm.
-while (not ts.value() or ir.value < 50):
+while not (ts.value() or ir.value() < 50):
 	follow_road()
 
 # Stops the robot and notifies the user with a beep.
