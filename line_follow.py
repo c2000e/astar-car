@@ -19,7 +19,8 @@ STRAIGHT = 0
 
 DIRECTIONS = [RIGHT]
 
-REASONABLE_DOUBT = 3
+REASONABLE_DOUBT = 0.6
+COLOR_MEMORY_LENGTH = 10
 
 
 # Integer value between 0 and 1000 that limits the speed of the motors.
@@ -41,6 +42,8 @@ turn_speed_reduction = 0.2
 black_side = 1
 
 past_colors = []
+for i in range(COLOR_MEMORY_LENGTH):
+	past_colors.append("")
 
 
 # Initializes color sensor and ensures it is connected.
@@ -69,7 +72,7 @@ assert r_motor.connected, "Connect right motor to port C."
 
 
 # Sets color sensor to return an integer value representative of the color its seeing.
-cl.mode = "RGB-RAW"
+cl.mode = "COL-COLOR"
 
 # Sets infrared sensor to measure proximity on a scale of 0% - 100%.
 # 0% is equivalent to 0 cm and 100% is approximately 70 cm.
@@ -104,14 +107,10 @@ def detect_color():
 
 	current_color = cl.value()
 
-	if len(past_colors) < 10:
-		past_colors.append(current_color)
-
-	else:
-		for i in range(len(past_colors) - 1):
-			past_colors[i] = past_colors[i + 1]
-
-		past_colors[past_colors - 1] = current_color
+	for i in range(len(past_colors) - 1):
+		past_colors[i] = past_colors[i + 1]
+	
+	past_colors[len(past_colors) - 1] = current_color
 
 	percent_unknown = past_colors.count(UNKNOWN) / len(past_colors)
 	percent_black = past_colors.count(BLACK) / len(past_colors)
@@ -167,6 +166,8 @@ def follow_road():
 
 
 def handle_node():
+	global past_colors
+
 	stop_motors()
 
 	turn_direction = get_directions()
@@ -175,6 +176,10 @@ def handle_node():
 		turn(turn_direction)
 
 	exit_node()
+
+	past_colors = []
+	for i in range(COLOR_MEMORY_LENGTH):
+		past_colors.append("")	
 
 
 def handle_failure():
