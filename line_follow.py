@@ -12,15 +12,9 @@ WHITE = 6
 
 COLORS = [UNKNOWN, BLACK, RED, WHITE]
 
-# Constants for possible directions that the robot may turn.
-RIGHT = 94
-LEFT = -90
-STRAIGHT = 0
-
-DIRECTIONS = [RIGHT]
+COLOR_MEMORY_LENGTH = 10
 
 REASONABLE_DOUBT = 0.6
-COLOR_MEMORY_LENGTH = 10
 
 
 # Integer value between 0 and 1000 that limits the speed of the motors.
@@ -50,10 +44,6 @@ for i in range(COLOR_MEMORY_LENGTH):
 cl = ColorSensor()
 assert cl.connected, "Connect color sensor."
 
-# Initializes gyro sensor and ensures it is connected.
-gr = GyroSensor()
-assert gr.connected, "Connect gyro sensor."
-
 # Initializes infrared sensor and ensures it is connected.
 ir = InfraredSensor()
 assert ir.connected, "Connect IR sensor."
@@ -77,13 +67,6 @@ cl.mode = "COL-COLOR"
 # Sets infrared sensor to measure proximity on a scale of 0% - 100%.
 # 0% is equivalent to 0 cm and 100% is approximately 70 cm.
 ir.mode = "IR-PROX"
-
-
-# Ensures that the gyro is oriented in the correct direction.
-def calibrate_gyro():
-	gr.mode = "GYRO-RATE"
-	gr.mode = "GYRO-ANG"
-	sleep(4)
 
 
 # Runs the motors until stopped while also allowing easy adjustment of speed.
@@ -204,20 +187,43 @@ def get_directions():
 def turn(turn_direction):
 	heading = turn_direction
 
-	angle = gr.value()
+	current_color = cl.value()
 
-	while angle != heading:
-		if angle < heading:
-			l_motor.speed_sp = max_speed * turn_speed_reduction
+	if black_side == 1:
+		if turn_direction == LEFT:
+			while current_color != WHITE:
+				r_motor.speed_sp = max_speed * turn_speed_reduction
 	
-		if angle > heading:
-			r_motor.speed_sp = max_speed * turn_speed_reduction
-		
+			while current_color != BLACK:
+				r_motor.speed_sp = max_speed * turn_speed_reduction
+
+		elif turn_direction == RIGHT:
+			while current_color != BLACK:
+				l_motor.speed_sp = max_speed * turn_speed_reduction
+	
+			while current_color != WHITE:
+				l_motor.speed_sp = max_speed * turn_speed_reduction
+
+	elif black_side == -1:
+		if turn_direction == LEFT:
+			while current_color != BLACK:
+				r_motor.speed_sp = max_speed * turn_speed_reduction
+	
+			while current_color != WHITE:
+				r_motor.speed_sp = max_speed * turn_speed_reduction
+
+		elif turn_direction == RIGHT:
+			while current_color != WHITE:
+				l_motor.speed_sp = max_speed * turn_speed_reduction
+	
+			while current_color != BLACK:
+				l_motor.speed_sp = max_speed * turn_speed_reduction
+
+
 		run_motors()
-		angle = gr.value()
+		current_color = cl.value()
 
 	stop_motors()
-	calibrate_gyro()
 
 
 def exit_node():
@@ -230,8 +236,6 @@ def exit_node():
 
 		current_color = cl.value()
 
-
-calibrate_gyro()
 
 # Runs only while the touch sensor is not activated and the infrared sensor doesn't detect anything within approximately 35 cm.
 while not (ts.value() or ir.value() < 50):
