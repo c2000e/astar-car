@@ -220,13 +220,6 @@ def turn(turn_direction):
 					if current_color != WHITE:
 						l_motor.speed_sp = max_speed
 						r_motor.speed_sp = -max_speed * turn_speed_reduction
-					#else:
-					#	found_first_color = True
-
-				#else:
-					#if current_color != BLACK:
-					#	l_motor.speed_sp = -max_speed * turn_speed_reduction
-					#	r_motor.speed_sp = max_speed * turn_speed_reduction
 					else:
 						turn_complete = True
 
@@ -265,14 +258,25 @@ def turn(turn_direction):
 
 
 def exit_node():
-	current_color = cl.value()
-	while current_color == RED:
-		l_motor.speed_sp = max_speed * turn_speed_reduction
-		r_motor.speed_sp = max_speed * turn_speed_reduction
+	target_reflection = 35
+	cl.mode = "COL-REFLECT"
 
-		run_motors()
+	for i in range(25):
+		error = (target_reflection - cl.value()) * error_scale
 
-		current_color = cl.value()
+		l_speed = (-7.2 * error * black_side) + max_speed
+		r_speed = (7.2 * error * black_side) + max_speed
+
+		if l_speed > max_speed:
+			l_speed = max_speed
+		if r_speed > max_speed:
+			r_speed = max_speed
+		
+		l_motor.speed_sp = l_speed
+		r_motor.speed_sp = r_speed
+
+	stop_motors()
+
 
 
 # Runs only while the touch sensor is not activated and the infrared sensor doesn't detect anything within approximately 35 cm.
