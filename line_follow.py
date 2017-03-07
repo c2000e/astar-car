@@ -16,9 +16,14 @@ COLOR_MEMORY_LENGTH = 10
 
 REASONABLE_DOUBT = 0.6
 
+LEFT = "left"
+STRAIGHT = "straight"
+RIGHT = "right"
+
+DIRECTIONS = [RIGHT]
 
 # Integer value between 0 and 1000 that limits the speed of the motors.
-max_speed = 540
+max_speed = 360
 
 # Float value that is used to keep track of how far off track the robot is.
 error = 0
@@ -141,7 +146,7 @@ def follow_road():
 
 		run_motors()
 
-	elif color_percents[2] > REASONABLE_DOUBT:
+	elif color_percents[2] > 0.1:
 		handle_node()
 
 	else:
@@ -185,39 +190,69 @@ def get_directions():
 
 
 def turn(turn_direction):
+	global black_side
+
+	found_first_color = False
+	turn_complete = False
+
 	heading = turn_direction
 
 	current_color = cl.value()
-
-	if black_side == 1:
-		if turn_direction == LEFT:
-			while current_color != WHITE:
-				r_motor.speed_sp = max_speed * turn_speed_reduction
 	
-			while current_color != BLACK:
-				r_motor.speed_sp = max_speed * turn_speed_reduction
-
-		elif turn_direction == RIGHT:
-			while current_color != BLACK:
-				l_motor.speed_sp = max_speed * turn_speed_reduction
+	while not turn_complete:
+		if black_side == 1:
+			if turn_direction == LEFT:
+				if not found_first_color:
+					if current_color != WHITE:
+						r_motor.speed_sp = max_speed * turn_speed_reduction
+					else:
+						found_first_color = True
 	
-			while current_color != WHITE:
-				l_motor.speed_sp = max_speed * turn_speed_reduction
+				else:
+					if current_color != BLACK:
+						r_motor.speed_sp = max_speed * turn_speed_reduction
+					else:
+						turn_complete = True
 
-	elif black_side == -1:
-		if turn_direction == LEFT:
-			while current_color != BLACK:
-				r_motor.speed_sp = max_speed * turn_speed_reduction
-	
-			while current_color != WHITE:
-				r_motor.speed_sp = max_speed * turn_speed_reduction
+			elif turn_direction == RIGHT:
+				if not found_first_color:
+					if current_color != BLACK:
+						l_motor.speed_sp = max_speed * turn_speed_reduction
+					#else:
+						#found_first_color = True
 
-		elif turn_direction == RIGHT:
-			while current_color != WHITE:
-				l_motor.speed_sp = max_speed * turn_speed_reduction
-	
-			while current_color != BLACK:
-				l_motor.speed_sp = max_speed * turn_speed_reduction
+				#else:
+					#if current_color != WHITE:
+						#l_motor.speed_sp = max_speed * turn_speed_reduction
+					else:
+						turn_complete = True
+
+		elif black_side == -1:
+			if turn_direction == LEFT:
+				if not found_first_color:
+					if current_color != BLACK:
+						r_motor.speed_sp = max_speed * turn_speed_reduction
+					else:
+						found_first_color = True	
+
+				else:
+					if current_color != WHITE:
+						r_motor.speed_sp = max_speed * turn_speed_reduction
+					else:
+						turn_complete = True
+
+			elif turn_direction == RIGHT:
+				if not found_first_color:
+					if current_color != WHITE:
+						l_motor.speed_sp = max_speed * turn_speed_reduction
+					else:
+						found_first_color = True	
+
+				else:
+					if current_color != BLACK:
+						l_motor.speed_sp = max_speed * turn_speed_reduction
+					else:
+						turn_complete = True
 
 
 		run_motors()
