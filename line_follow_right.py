@@ -15,7 +15,7 @@ COLORS = [UNKNOWN, BLACK, RED, WHITE]
 
 # Constants for possible directions that the robot may turn.
 RIGHT = 94
-LEFT = -90
+LEFT = -88
 STRAIGHT = 0
 
 DIRECTIONS = [LEFT]

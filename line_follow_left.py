@@ -14,15 +14,15 @@ COLORS = [UNKNOWN, BLACK, RED, WHITE]
 
 
 # Constants for possible directions that the robot may turn.
-RIGHT = 94
-LEFT = -90
+RIGHT = 90
+LEFT = -88
 STRAIGHT = 0
 
 DIRECTIONS = [RIGHT]
 
 
 # Integer value between 0 and 1000 that limits the speed of the motors.
-max_speed = 540
+max_speed = 180
 
 # Float value that is used to keep track of how far off track the robot is.
 error = 0
@@ -34,7 +34,7 @@ adjustment = 0.05
 heading = 0
 
 # Float value that is muliplied by the robot's max speed to slow down the robot during turns to increase accuracy.
-turn_speed_reduction = 0.2
+turn_speed_reduction = 0.5
 
 # Boolean value (1 or -1) that decides whether the robot should expect black to be on the left or right side of the robot's center.
 black_side = 1
