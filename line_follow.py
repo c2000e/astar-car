@@ -12,13 +12,14 @@ WHITE = 6
 
 COLORS = [UNKNOWN, BLACK, RED, WHITE]
 
-
 # Constants for possible directions that the robot may turn.
 RIGHT = 94
 LEFT = -90
 STRAIGHT = 0
 
 DIRECTIONS = [RIGHT]
+
+REASONABLE_DOUBT = 3
 
 
 # Integer value between 0 and 1000 that limits the speed of the motors.
@@ -38,6 +39,8 @@ turn_speed_reduction = 0.2
 
 # Boolean value (1 or -1) that decides whether the robot should expect black to be on the left or right side of the robot's center.
 black_side = 1
+
+past_colors = []
 
 
 # Initializes color sensor and ensures it is connected.
@@ -94,13 +97,28 @@ def stop_motors():
 	l_motor.speed_sp = 0
 	r_motor.speed_sp = 0
 
-def detect_color():
-	red = cl.value(0)
-	green = cl.value(1)
-	blue = cl.value(2)
 
-	if red < 100 and red > 0:
-		
+def detect_color():
+	global COLORS
+	global past_colors
+
+	current_color = cl.value()
+
+	if len(past_colors) < 10:
+		past_colors.append(current_color)
+
+	else:
+		for i in range(len(past_colors) - 1):
+			past_colors[i] = past_colors[i + 1]
+
+		past_colors[past_colors - 1] = current_color
+
+	percent_unknown = past_colors.count(UNKNOWN) / len(past_colors)
+	percent_black = past_colors.count(BLACK) / len(past_colors)
+	percent_red = past_colors.count(RED) / len(past_colors)
+	percent_white = past_colors.count(WHITE) / len(past_colors)
+
+	return(percent_unknown, percent_black, percent_red, percent_white)
 
 
 # Changes the speed of the motors to make the robot follow a line.
@@ -109,7 +127,9 @@ def follow_road():
 	global black_side
 
 	current_color = cl.value()
-	if (current_color != RED) and (current_color in COLORS):
+	color_percents = detect_color()
+
+	if (color_percents[0] < REASONABLE_DOUBT) and (color_percents[2] < REASONABLE_DOUBT):
 		if current_color == BLACK:
 			error -= adjustment
 
@@ -139,7 +159,7 @@ def follow_road():
 
 		run_motors()
 
-	elif current_color == RED:
+	elif color_percents[2] > REASONABLE_DOUBT:
 		handle_node()
 
 	else:
