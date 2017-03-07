@@ -14,7 +14,7 @@ COLORS = [UNKNOWN, BLACK, RED, WHITE]
 
 COLOR_MEMORY_LENGTH = 10
 
-REASONABLE_DOUBT = 0.6
+REASONABLE_DOUBT = 1
 
 LEFT = "left"
 STRAIGHT = "straight"
@@ -261,11 +261,11 @@ def exit_node():
 	target_reflection = 35
 	cl.mode = "COL-REFLECT"
 
-	for i in range(25):
-		error = (target_reflection - cl.value()) * error_scale
+	for i in range(100):
+		error = (target_reflection - cl.value()) * 0.5
 
-		l_speed = (-7.2 * error * black_side) + max_speed
-		r_speed = (7.2 * error * black_side) + max_speed
+		l_speed = (7.2 * error * black_side) + max_speed
+		r_speed = (-7.2 * error * black_side) + max_speed
 
 		if l_speed > max_speed:
 			l_speed = max_speed
@@ -275,7 +275,10 @@ def exit_node():
 		l_motor.speed_sp = l_speed
 		r_motor.speed_sp = r_speed
 
+		run_motors()
+
 	stop_motors()
+	cl.mode = "COL-COLOR"
 
 
 
