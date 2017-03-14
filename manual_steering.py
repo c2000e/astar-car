@@ -278,7 +278,7 @@ while not (ts.value() or ir.value() < 50):
 	data = connection.recv(1024)
 	turn_directions = pickle.loads(data)
 
-	for i in range len(turn_directions):
+	for i in range(len(turn_directions)):
 		turn_direction = turn_directions[i]
 
 		current_color = cl.value()
