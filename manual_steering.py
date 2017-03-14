@@ -281,23 +281,24 @@ while not (ts.value() or ir.value() < 50):
 	for i in range(len(turn_directions)):
 		turn_direction = turn_directions[i]
 
-		current_color = cl.value()
-		color_percents = detect_color()
+		while True:
+			current_color = cl.value()
+			color_percents = detect_color()
 
-		if (color_percents[0] < ROAD_THRESHOLD) and (color_percents[2] < ROAD_THRESHOLD):
-			print("FOLLOWING ROAD")
-			follow_road()
+			if (color_percents[0] < ROAD_THRESHOLD) and (color_percents[2] < ROAD_THRESHOLD):
+				print("FOLLOWING ROAD")
+				follow_road()
 
-		elif color_percents[2] > RED_NODE_THRESHOLD:
-			print("HANDLING NODE")
-			handle_node(turn_direction)
-			return_message = "Directions completed."
-			return_message = pickle.dumps(return_message)
-			connection.sendall(return_message)
-			break
+			elif color_percents[2] > RED_NODE_THRESHOLD:
+				print("HANDLING NODE")
+				handle_node(turn_direction)
+				return_message = "Directions completed."
+				return_message = pickle.dumps(return_message)
+				connection.sendall(return_message)
+				break
 
-		else:
-			handle_failure()
+			else:
+				handle_failure()
 
 
 
