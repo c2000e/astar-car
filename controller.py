@@ -33,12 +33,13 @@ class Robot_Handler:
 		self.mode = MANUAL_CONTROL
 
 		self.grid = grid
+		print(self.grid)
 		self.grid_x = len(grid[0])
 		self.grid_y = len(grid)
 
 		for y in range(self.grid_y):
 			for x in range(self.grid_x):
-				node_value = self.grid[y[x]]
+				node_value = self.grid[y][x]
 
 				if node_value == ROBOT:
 					self.x = x
@@ -138,32 +139,32 @@ class Robot_Handler:
 
 	def update_location(self):
 		if self.true_goal == TRUE_UP:
-			self.grid[self.y[self.x]] = 0
+			self.grid[self.y][self.x] = 0
 
 			self.y -= 1
 
-			self.grid[self.y[self.x]] = 1
+			self.grid[self.y][self.x] = 1
 
 		elif self.true_goal == TRUE_DOWN:
-			self.grid[self.y[self.x]] = 0
+			self.grid[self.y][self.x] = 0
 
 			self.y += 1
 
-			self.grid[self.y[self.x]] = 1
+			self.grid[self.y][self.x] = 1
 
 		elif self.true_goal == TRUE_LEFT:
-			self.grid[self.y[self.x]] = 0
+			self.grid[self.y][self.x] = 0
 
 			self.x -= 1
 
-			self.grid[self.y[self.x]] = 1
+			self.grid[self.y][self.x] = 1
 
 		elif self.true_goal == TRUE_RIGHT:
-			self.grid[self.y[self.x]] = 0
+			self.grid[self.y][self.x] = 0
 
 			self.x += 1
 
-			self.grid[self.y[self.x]] = 1
+			self.grid[self.y][self.x] = 1
 
 
 	def update_orientation(self):
@@ -182,14 +183,14 @@ class Robot_Handler:
 socket_connection.connect((HOST_IP, PORT))
 connected = True
 
-robot = Robot()
-while connnected:
+robot = Robot_Handler(grid)
+while connected:
 	robot.run()
 
 	data = robot.relative_goal
 	data = pickle.dumps(data)
 
-	socket_connection.send_all(data)
+	socket_connection.sendall(data)
 
 	while not socket_connection.recv(1024):
 		print("Waiting for response...")
