@@ -281,7 +281,7 @@ while not (ts.value() or ir.value() < 50):
 			print("FOLLOWING ROAD")
 			follow_road()
 
-		elif color_percents[2] > 0.1:
+		elif color_percents[2] > 0.3:
 			print("HANDLING NODE")
 			handle_node(turn_direction)
 			connection.sendall("Directions completed.")
