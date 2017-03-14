@@ -185,9 +185,15 @@ connected = True
 
 robot = Robot_Handler(grid)
 while connected:
-        robot.run()
+        #robot.run()
 
-        data = robot.relative_goal
+        turns = []
+        for i in range(10):
+                turn_direction = raw_input("left, right, straight: ")
+                turns.append[turn_direction]
+                
+
+        data = turns 
         data = pickle.dumps(data)
 
         socket_connection.sendall(data)
