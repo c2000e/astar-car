@@ -7,6 +7,9 @@ from random import choice
 import pickle
 import socket
 
+HOST = ""
+PORT = "9999"
+
 # Constants for colors that should be recognized by the program
 UNKNOWN = 0
 BLACK = 1
@@ -259,7 +262,7 @@ def exit_node():
 	cl.mode = "COL-COLOR"
 
 
-socket.bind((host, port))
+socket.bind((HOST, PORT))
 socket.listen(1)
 connection, client_ip = socket.accept()
 print("Connected to ", client_ip)
