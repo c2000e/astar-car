@@ -162,6 +162,9 @@ def handle_node(turn_direction):
 	if turn_direction != STRAIGHT:
 		turn(turn_direction)
 
+	else:
+		black_side *= -1
+
 	exit_node()
 
 	past_colors = []
