@@ -22,11 +22,10 @@ COLOR_MEMORY_LENGTH = 10
 
 REASONABLE_DOUBT = 1
 
-LEFT = 1
-STRAIGHT = 0
-RIGHT = 2
 
-DIRECTIONS = [RIGHT]
+STRAIGHT = 0
+LEFT = 1
+RIGHT = 2
 
 # Integer value between 0 and 1000 that limits the speed of the motors.
 MAX_SPEED = 360
@@ -285,6 +284,7 @@ while not (ts.value() or ir.value() < 50):
 			print("HANDLING NODE")
 			handle_node(turn_direction)
 			return_message = "Directions completed."
+			return_message = pickle.dumps(return_message)
 			connection.sendall(return_message)
 			break
 

@@ -33,7 +33,6 @@ class Robot_Handler:
 		self.mode = MANUAL_CONTROL
 
 		self.grid = grid
-		print(self.grid)
 		self.grid_x = len(grid[0])
 		self.grid_y = len(grid)
 
@@ -82,18 +81,18 @@ class Robot_Handler:
 		user_input = False
 
 		while not user_input:
-			user_input = raw_input("DIRECTION (U, D, L, R): ")
+			user_input = raw_input("DIRECTION (u, d, l, r): ")
 			
-			if user_input == "U":
+			if user_input == "u":
 				user_input = TRUE_UP
 
-			elif user_input == "D":
+			elif user_input == "d":
 				user_input = TRUE_DOWN
 
-			elif user_input == "L":
+			elif user_input == "l":
 				user_input = TRUE_LEFT
 
-			elif user_input == "R":
+			elif user_input == "r":
 				user_input = TRUE_RIGHT
 
 			if user_input in self.possible_orientations:
@@ -173,7 +172,7 @@ class Robot_Handler:
 
 	def run(self):
 		if self.mode == MANUAL_CONTROL:
-			self.get_possible_orientations()
+			#self.get_possible_orientations()
 			self.get_input()
 			self.convert_true_to_relative()
 			self.update_location()
