@@ -10,6 +10,8 @@ import socket
 HOST = ""
 PORT = 9999
 
+LEGO_SLOPE = 3.6
+
 # Constants for colors that should be recognized by the program
 UNKNOWN = 0
 BLACK = 1
@@ -242,10 +244,10 @@ def exit_node():
 	cl.mode = "COL-REFLECT"
 
 	for i in range(100):
-		error = (target_reflection - cl.value()) * 0.5
+		error = (target_reflection - cl.value())
 
-		l_speed = (7.2 * error * black_side) + MAX_SPEED
-		r_speed = (-7.2 * error * black_side) + MAX_SPEED
+		l_speed = (LEGO_SLOPE * error * black_side) + MAX_SPEED
+		r_speed = (-LEGO_SLOPE * error * black_side) + MAX_SPEED
 
 		if l_speed > MAX_SPEED:
 			l_speed = MAX_SPEED
