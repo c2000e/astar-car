@@ -45,7 +45,7 @@ heading = 0
 turn_speed_reduction = 0.2
 
 # Boolean value (1 or -1) that decides whether the robot should expect black to be on the left or right side of the robot's center.
-black_side = 1
+black_side = -1
 
 past_colors = []
 for i in range(COLOR_MEMORY_LENGTH):
@@ -296,7 +296,6 @@ while not (ts.value() or ir.value() < 50):
 
 		else:
 			handle_failure()
-			break
 
 
 
