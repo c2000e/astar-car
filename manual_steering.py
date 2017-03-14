@@ -154,6 +154,7 @@ def follow_road():
 
 def handle_node(turn_direction):
 	global past_colors
+	global black_side
 
 	stop_motors()
 
