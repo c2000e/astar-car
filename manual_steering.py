@@ -284,7 +284,8 @@ while not (ts.value() or ir.value() < 50):
 		elif color_percents[2] > 0.3:
 			print("HANDLING NODE")
 			handle_node(turn_direction)
-			connection.sendall("Directions completed.")
+			return_message = "Directions completed."
+			connection.sendall(return_message)
 			break
 
 		else:
