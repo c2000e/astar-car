@@ -8,7 +8,7 @@ import pickle
 import socket
 
 HOST = ""
-PORT = "9999"
+PORT = 9999
 
 # Constants for colors that should be recognized by the program
 UNKNOWN = 0
