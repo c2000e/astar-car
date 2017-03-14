@@ -259,8 +259,8 @@ def exit_node():
 	cl.mode = "COL-COLOR"
 
 
-s.bind((host, port))
-s.listen(1)
+socket.bind((host, port))
+socket.listen(1)
 connection, client_ip = socket.accept()
 print("Connected to ", client_ip)
 
@@ -277,6 +277,7 @@ while not (ts.value() or ir.value() < 50):
 
 	elif color_percents[2] > 0.1:
 		handle_node(turn_direction)
+		connection.sendall("Directions completed.")
 
 	else:
 		handle_failure()
