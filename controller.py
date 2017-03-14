@@ -190,7 +190,7 @@ while connected:
         turns = []
         for i in range(10):
                 turn_direction = raw_input("left, right, straight: ")
-                turns.append[turn_direction]
+                turns.append(turn_direction)
                 
 
         data = turns 
