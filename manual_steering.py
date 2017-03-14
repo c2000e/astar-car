@@ -4,6 +4,9 @@ from time import sleep
 
 from random import choice
 
+import pickle
+import socket
+
 # Constants for colors that should be recognized by the program
 UNKNOWN = 0
 BLACK = 1
@@ -16,14 +19,14 @@ COLOR_MEMORY_LENGTH = 10
 
 REASONABLE_DOUBT = 1
 
-LEFT = "left"
-STRAIGHT = "straight"
-RIGHT = "right"
+LEFT = 0
+STRAIGHT = 1
+RIGHT = 2
 
 DIRECTIONS = [RIGHT]
 
 # Integer value between 0 and 1000 that limits the speed of the motors.
-max_speed = 360
+MAX_SPEED = 360
 
 # Float value that is used to keep track of how far off track the robot is.
 error = 0
@@ -73,6 +76,8 @@ cl.mode = "COL-COLOR"
 # 0% is equivalent to 0 cm and 100% is approximately 70 cm.
 ir.mode = "IR-PROX"
 
+socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
 
 # Runs the motors until stopped while also allowing easy adjustment of speed.
 def run_motors():
@@ -113,52 +118,42 @@ def follow_road():
 	global error
 	global black_side
 
-	current_color = cl.value()
-	color_percents = detect_color()
+	if current_color == BLACK:
+		error -= adjustment
 
-	if (color_percents[0] < REASONABLE_DOUBT) and (color_percents[2] < REASONABLE_DOUBT):
-		if current_color == BLACK:
-			error -= adjustment
+	elif current_color == WHITE:
+		error += adjustment
 
-		elif current_color == WHITE:
-			error += adjustment
-	
-		if error > 0.15:
-			error = 0.15
-		elif error < -0.15:
-			error = -0.15
+	if error > 0.15:
+		error = 0.15
+	elif error < -0.15:
+		error = -0.15
 
-		left_motor_speed = (-1 * max_speed * error * black_side) + max_speed
-		right_motor_speed = (max_speed * error * black_side) + max_speed
+	left_motor_speed = (-1 * MAX_SPEED * error * black_side) + MAX_SPEED
+	right_motor_speed = (MAX_SPEED * error * black_side) + MAX_SPEED
 
-		if left_motor_speed > max_speed:
-			left_motor_speed = max_speed
-		elif left_motor_speed < -max_speed:
-			left_motor_speed = -max_speed
+	if left_motor_speed > MAX_SPEED:
+		left_motor_speed = MAX_SPEED
+	elif left_motor_speed < -MAX_SPEED:
+		left_motor_speed = -MAX_SPEED
 
-		if right_motor_speed > max_speed:
-			right_motor_speed = max_speed
-		elif right_motor_speed < -max_speed:
-			right_motor_speed = -max_speed
+	if right_motor_speed > MAX_SPEED:
+		right_motor_speed = MAX_SPEED
+	elif right_motor_speed < -MAX_SPEED:
+		right_motor_speed = -MAX_SPEED
 
-		l_motor.speed_sp = left_motor_speed
-		r_motor.speed_sp = right_motor_speed
+	l_motor.speed_sp = left_motor_speed
+	r_motor.speed_sp = right_motor_speed
 
-		run_motors()
-
-	elif color_percents[2] > 0.1:
-		handle_node()
-
-	else:
-		handle_failure()
+	run_motors()
 
 
-def handle_node():
+def handle_node(turn_direction):
 	global past_colors
 
 	stop_motors()
 
-	turn_direction = get_directions()
+	#turn_direction = get_directions()
 
 	if turn_direction != STRAIGHT:
 		turn(turn_direction)
@@ -203,16 +198,16 @@ def turn(turn_direction):
 			if turn_direction == LEFT:
 				if not turn_complete:
 					if current_color != BLACK:
-						l_motor.speed_sp = -max_speed * turn_speed_reduction
-						r_motor.speed_sp = max_speed
+						l_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
+						r_motor.speed_sp = MAX_SPEED
 					else:
 						turn_complete = True
 
 			elif turn_direction == RIGHT:
 				if not turn_complete:
 					if current_color != WHITE:
-						l_motor.speed_sp = max_speed
-						r_motor.speed_sp = -max_speed * turn_speed_reduction
+						l_motor.speed_sp = MAX_SPEED
+						r_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
 					else:
 						turn_complete = True
 
@@ -220,16 +215,16 @@ def turn(turn_direction):
 			if turn_direction == LEFT:
 				if not turn_complete:
 					if current_color != WHITE:
-						l_motor.speed_sp = -max_speed * turn_speed_reduction
-						r_motor.speed_sp = max_speed
+						l_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
+						r_motor.speed_sp = MAX_SPEED
 					else:
 						turn_complete = True	
 
 			elif turn_direction == RIGHT:
 				if not turn_complete:
 					if current_color != BLACK:
-						l_motor.speed_sp = max_speed
-						r_motor.speed_sp = -max_speed * turn_speed_reduction
+						l_motor.speed_sp = MAX_SPEED
+						r_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
 					else:
 						turn_complete = True	
 
@@ -247,13 +242,13 @@ def exit_node():
 	for i in range(100):
 		error = (target_reflection - cl.value()) * 0.5
 
-		l_speed = (7.2 * error * black_side) + max_speed
-		r_speed = (-7.2 * error * black_side) + max_speed
+		l_speed = (7.2 * error * black_side) + MAX_SPEED
+		r_speed = (-7.2 * error * black_side) + MAX_SPEED
 
-		if l_speed > max_speed:
-			l_speed = max_speed
-		if r_speed > max_speed:
-			r_speed = max_speed
+		if l_speed > MAX_SPEED:
+			l_speed = MAX_SPEED
+		if r_speed > MAX_SPEED:
+			r_speed = MAX_SPEED
 		
 		l_motor.speed_sp = l_speed
 		r_motor.speed_sp = r_speed
@@ -264,10 +259,29 @@ def exit_node():
 	cl.mode = "COL-COLOR"
 
 
+s.bind((host, port))
+s.listen(1)
+connection, client_ip = socket.accept()
+print("Connected to ", client_ip)
 
 # Runs only while the touch sensor is not activated and the infrared sensor doesn't detect anything within approximately 35 cm.
 while not (ts.value() or ir.value() < 50):
-	follow_road()
+	data = connection.recv(1024)
+	turn_direction = pickle.loads(data)
+
+	current_color = cl.value()
+	color_percents = detect_color()
+
+	if (color_percents[0] < REASONABLE_DOUBT) and (color_percents[2] < REASONABLE_DOUBT):
+		follow_road()
+
+	elif color_percents[2] > 0.1:
+		handle_node(turn_direction)
+
+	else:
+		handle_failure()
+
+
 
 # Stops the robot and notifies the user with a beep.
 stop_motors()
