@@ -18,11 +18,12 @@ BLACK = 1
 RED = 5
 WHITE = 6
 
-COLORS = [UNKNOWN, BLACK, RED, WHITE]
+COLORS = [UNKNOWN, BLACK, RED, WHITE].
 
 COLOR_MEMORY_LENGTH = 10
 
-REASONABLE_DOUBT = 1
+ROAD_THRESHOLD = 1
+RED_NODE_THRESHOLD = 0.3
 
 
 STRAIGHT = 0
@@ -275,18 +276,19 @@ print("Connected to ", client_ip)
 # Runs only while the touch sensor is not activated and the infrared sensor doesn't detect anything within approximately 35 cm.
 while not (ts.value() or ir.value() < 50):
 	data = connection.recv(1024)
-	turn_direction = pickle.loads(data)
-	print(turn_direction)
+	turn_directions = pickle.loads(data)
 
-	while True:
+	for i in range len(turn_directions):
+		turn_direction = turn_directions[i]
+
 		current_color = cl.value()
 		color_percents = detect_color()
 
-		if (color_percents[0] < REASONABLE_DOUBT) and (color_percents[2] < REASONABLE_DOUBT):
+		if (color_percents[0] < ROAD_THRESHOLD) and (color_percents[2] < ROAD_THRESHOLD):
 			print("FOLLOWING ROAD")
 			follow_road()
 
-		elif color_percents[2] > 0.3:
+		elif color_percents[2] > RED_NODE_THRESHOLD:
 			print("HANDLING NODE")
 			handle_node(turn_direction)
 			return_message = "Directions completed."
