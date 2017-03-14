@@ -96,12 +96,12 @@ class Robot_Handler:
 			elif user_input == "R":
 				user_input = TRUE_RIGHT
 
-			if user_input not in self.possible_orientations:
-				user_input = False
-				print("Cannot go that direction.")
+			if user_input in self.possible_orientations:
+				self.true_goal = user_input
 
 			else:
-				self.true_goal = user_input
+				user_input = False
+				print("Cannot go that direction.")
 
 
 	def convert_true_to_relative(self):

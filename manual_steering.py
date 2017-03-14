@@ -273,20 +273,23 @@ while not (ts.value() or ir.value() < 50):
 	turn_direction = pickle.loads(data)
 	print(turn_direction)
 
-	current_color = cl.value()
-	color_percents = detect_color()
+	while True:
+		current_color = cl.value()
+		color_percents = detect_color()
 
-	if (color_percents[0] < REASONABLE_DOUBT) and (color_percents[2] < REASONABLE_DOUBT):
-		print("FOLLOWING ROAD")
-		follow_road()
+		if (color_percents[0] < REASONABLE_DOUBT) and (color_percents[2] < REASONABLE_DOUBT):
+			print("FOLLOWING ROAD")
+			follow_road()
 
-	elif color_percents[2] > 0.1:
-		print("HANDLING NODE")
-		handle_node(turn_direction)
-		connection.sendall("Directions completed.")
+		elif color_percents[2] > 0.1:
+			print("HANDLING NODE")
+			handle_node(turn_direction)
+			connection.sendall("Directions completed.")
+			break
 
-	else:
-		handle_failure()
+		else:
+			handle_failure()
+			break
 
 
 
