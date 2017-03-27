@@ -288,12 +288,11 @@ while not (ts.value() or ir.value() < 50):
 	direction_queue_length = len(direction_queue) - 1
 
 	if (direction_queue[direction_queue_length] == QUEUE_CONTROL) or (direction_queue[direction_queue_length] == A_STAR):
-		print(direction_queue_length)
 		for i in range(direction_queue_length):
-			print(i)
 			turn_direction = direction_queue[i]
 
 			while (ts.value() == 0) or (ir.value() > 50):
+				print(ir.value)
 				current_color = cl.value()
 				color_percents = detect_color()
 
