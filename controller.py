@@ -10,6 +10,9 @@ A_STAR = 2
 HOST_IP = "209.114.104.245"
 PORT = 9999
 
+OFF = 0
+ON = 1
+
 LEFT = "left"
 RIGHT = "right"
 STRAIGHT = "straight"
@@ -18,8 +21,10 @@ DISCONNECT_MESSAGE = "DISCONNECT"
 
 SCREEN_DIMENSIONS = [500, 700]
 
+PYGAME_SETUP = FALSE
 
-mode = 0
+
+mode = 1
 is_robot_moving = False
 
 socket_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -66,17 +71,52 @@ def queue_control():
 
 
 def manual_control():
-	#control_values = get_controller_input()
-	#return(control_values)
-	print("NOT FINISHED")
+	global PYGAME_SETUP
+	global socket_connection
+
+	if not PYGAME_SETUP:
+		pygame.init()
+
+		screen = pygame.display.set_mode(SCREEN_DIMENSIONS)
+
+		pygame.display.set_caption("A* Car")
+
+		running = True
+
+		PYGAME_SETUP = True
+
+
+	else:
+		while running:
+			for event in pygame.event.get():
+				if event.type == pygame.QUIT:
+					running = False
+					pygame.quit()
+
+				if event.type == pygame.KEYDOWN:
+					if event.key == pygame.K_w:
+						left_wheel = ON
+						right_wheel = ON
+
+					#elif event.key == pygame.K_d:
+					#	right_wheel = ON
+
+					#elif event.key == pygame.K_a:
+					#	left_wheel = ON
+
+					else:
+						left_wheel = OFF
+						right_wheel = OFF
+
+				directions = pickle.dumps([left_wheel, right_wheel, MANUAL_CONTROL])
+
+				send_data(directions, socket_connection)
 
 
 def a_star():
 	#return(direction_queue)
 	print("NOT FINISHED")
 
-
-#pygame.init()
 
 socket_connection.connect((HOST_IP, PORT))
 connected = True

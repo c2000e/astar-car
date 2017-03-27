@@ -16,6 +16,9 @@ QUEUE_CONTROL = 0
 MANUAL_CONTROL = 1
 A_STAR = 2
 
+OFF = 0
+ON = 1
+
 SUCCESS_MSG = pickle.dumps("Directions completed.")
 
 
@@ -309,7 +312,21 @@ while True:
 
 
 	elif direction_queue[direction_queue_length] == MANUAL_CONTROL:
-		print("NOT FINISHED YET")
+		l_motor.speed_sp = MAX_SPEED
+		r_motor.speed_sp = MAX_SPEED
+
+		if direction_queue[LEFT_MOTOR] == ON:
+			l_motor.run_timed(1)
+
+		else:
+			l_motor.stop(stop_action = "hold")
+
+		if direction_queue[RIGHT_MOTOR] == ON:
+			pr_motor.run_timed(1)
+
+		else:
+			r_motor.stop(stop_action = "hold")
+
 
 	else:
 		print("INVALID MODE")
