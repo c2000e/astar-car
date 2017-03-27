@@ -291,18 +291,19 @@ while not (ts.value() or ir.value() < 50):
 	if (direction_queue[direction_queue_length] == QUEUE_CONTROL) or (direction_queue[direction_queue_length] == A_STAR):
 		for i in range(direction_queue_length):
 			turn_direction = direction_queue[i]
-			
-			color_percents = detect_color()
 
-			if (color_percents[0] < ROAD_THRESHOLD) and (color_percents[2] < ROAD_THRESHOLD):
-				follow_road()
+			while True:
+				color_percents = detect_color()
 
-			elif color_percents[2] > RED_NODE_THRESHOLD:
-				handle_node(turn_direction)
-				break
+				if (color_percents[0] < ROAD_THRESHOLD) and (color_percents[2] < ROAD_THRESHOLD):
+					follow_road()
 
-			else:
-				handle_failure()
+				elif color_percents[2] > RED_NODE_THRESHOLD:
+					handle_node(turn_direction)
+					break
+
+				else:
+					handle_failure()
 
 		connection.sendall(SUCCESS_MSG)
 
