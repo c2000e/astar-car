@@ -280,8 +280,7 @@ socket.listen(1)
 connection, client_ip = socket.accept()
 print("Connected to ", client_ip)
 
-# Runs only while the touch sensor is not activated and the infrared sensor doesn't detect anything within approximately 35 cm.
-while not (ts.value() or ir.value() < 50):
+while True:
 	ser_direction_queue = connection.recv(1024)
 	direction_queue = pickle.loads(ser_direction_queue)
 
@@ -291,7 +290,7 @@ while not (ts.value() or ir.value() < 50):
 		for i in range(direction_queue_length):
 			turn_direction = direction_queue[i]
 
-			while (ts.value() == 0) and (ir.value() > 50):
+			while not (ts.value() or ir.value() < 50):
 				print(ir.value())
 				current_color = cl.value()
 				color_percents = detect_color()
