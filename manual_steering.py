@@ -302,6 +302,7 @@ while not (ts.value() or ir.value() < 50):
 
 				elif color_percents[2] > RED_NODE_THRESHOLD:
 					handle_node(turn_direction)
+					break
 
 				else:
 					handle_failure()
