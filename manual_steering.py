@@ -283,7 +283,7 @@ print("Connected to ", client_ip)
 # Runs only while the touch sensor is not activated and the infrared sensor doesn't detect anything within approximately 35 cm.
 while not (ts.value() or ir.value() < 50):
 	ser_direction_queue = connection.recv(1024)
-	direction_queue = pickle.loads(data)
+	direction_queue = pickle.loads(ser_direction_queue)
 
 	direction_queue_length = len(direction_queue) - 1
 
