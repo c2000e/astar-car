@@ -12,6 +12,13 @@ PORT = 9999
 
 LEGO_SLOPE = 3.6
 
+QUEUE_CONTROL = 0
+MANUAL_CONTROL = 1
+A_STAR = 2
+
+SUCCESS_MSG = pickle.dumps("Directions completed.")
+
+
 # Constants for colors that should be recognized by the program
 UNKNOWN = 0
 BLACK = 1
@@ -275,30 +282,43 @@ print("Connected to ", client_ip)
 
 # Runs only while the touch sensor is not activated and the infrared sensor doesn't detect anything within approximately 35 cm.
 while not (ts.value() or ir.value() < 50):
-	data = connection.recv(1024)
-	turn_directions = pickle.loads(data)
+	ser_direction_queue = connection.recv(1024)
+	direction_queue = pickle.loads(data)
 
-	for i in range(len(turn_directions)):
-		turn_direction = turn_directions[i]
+	direction_queue_length = len(direction_queue) - 1
 
-		while True:
-			current_color = cl.value()
-			color_percents = detect_color()
+	if (direction_queue[direction_queue_length] == QUEUE_CONTROL) or (direction_queue[direction_queue_length] == A_STAR):
+		for i in range(direction_queue_length):
+			turn_direction = direction_queue[i]
 
-			if (color_percents[0] < ROAD_THRESHOLD) and (color_percents[2] < ROAD_THRESHOLD):
-				print("FOLLOWING ROAD")
-				follow_road()
+			while True:
+				current_color = cl.value()
+				color_percents = detect_color()
 
-			elif color_percents[2] > RED_NODE_THRESHOLD:
-				print("HANDLING NODE")
-				handle_node(turn_direction)
-				return_message = "Directions completed."
-				return_message = pickle.dumps(return_message)
-				connection.sendall(return_message)
-				break
+				if (color_percents[0] < ROAD_THRESHOLD) and (color_percents[2] < ROAD_THRESHOLD):
+					print("FOLLOWING ROAD")
+					follow_road()
 
-			else:
-				handle_failure()
+				elif color_percents[2] > RED_NODE_THRESHOLD:
+					print("HANDLING NODE")
+					handle_node(turn_direction)
+
+				else:
+					handle_failure()
+
+		connection.sendall(SUCCESS_MSG)
+
+
+	elif direction_queue[direction_queue_length] == MANUAL_CONTROL:
+		print("NOT FINISHED YET")
+
+	else:
+		print("INVALID MODE")
+
+return_message = "Directions completed."
+return_message = pickle.dumps(return_message)
+connection.sendall(return_message)
+break
 
 
 

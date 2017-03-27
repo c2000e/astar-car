@@ -1,208 +1,103 @@
 import pickle
+import pygame
 import socket
 
-A_STAR = 0
-MANUAL_CONTROL = 1
 
-ROBOT = 1
+QUEUE_CONTROL = 0
+MANUAL_CONTROL = 1
+A_STAR = 2
 
 HOST_IP = "209.114.104.54"
 PORT = 9999
 
-TRUE_UP = 0
-TRUE_DOWN = 1
-TRUE_LEFT = 2
-TRUE_RIGHT = 3
+LEFT = "left"
+RIGHT = "right"
+STRAIGHT = "straight"
 
-STRAIGHT = 0
-LEFT = 1
-RIGHT = 2
-
-START_X = 3
-START_Y = 2
-grid = [[0, 0, 0],
-        [0, 0, 1]]
-
-START_ORIENTATION = TRUE_UP
 DISCONNECT_MESSAGE = "DISCONNECT"
+
+SCREEN_DIMENSIONS = [500, 700]
+
+
+mode = 0
+is_robot_moving = False
 
 socket_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-class Robot_Handler:
-        def __init__(self, grid):
-                self.mode = MANUAL_CONTROL
 
-                self.grid = grid
-                self.grid_x = len(grid[0])
-                self.grid_y = len(grid)
+def get_typed_direction_queue():
+        user_input = False
+        possible_inputs = ["left", "right", "straight", "send"]
+        direction_queue = []
 
-                for y in range(self.grid_y):
-                        for x in range(self.grid_x):
-                                node_value = self.grid[y][x]
+        while True:
+                user_input = raw_input("'left', 'right', or 'straight'. 'send' to deliver instructions to robot: ")
 
-                                if node_value == ROBOT:
-                                        self.x = x
-                                        self.y = y
+                if user_input in possible_inputs[0:3]:
+                	direction_queue.append(user_input)
 
-                self.true_orientation = START_ORIENTATION
+                elif user_input == possible_inputs[3]:
+                	break
 
-                self.possible_orientations = [TRUE_UP, TRUE_DOWN, TRUE_LEFT, TRUE_RIGHT]
+                elif user_input == "8":
+                	direction_queue = ["left", "left", "right", "right", "right", "right", "left"]
+                	break
 
-        def get_possible_orientations(self):
-                self.possible_orientations = [TRUE_UP, TRUE_DOWN, TRUE_LEFT, TRUE_RIGHT]
-                if self.y == 0:
-                        del self.possible_orientations[0]
-                        
-                elif self.y == 1:
-                        del self.possible_orientations[1]
-                        
-                elif self.x == 0:
-                        del self.possible_orientations[2]
+                else:
+                	print("Please input 'left', 'right', 'straight', or 'send'.")
 
-                elif self.x == 2:
-                        del self.possible_orientations[3]
+        return(direction_queue)
 
 
-                if self.true_orientation == TRUE_UP:
-                        del self.possible_orientations[1]
+def send_data(data, socket_connection):
+	ser_data = pickle.dumps(data)
 
-                elif self.true_orientation == TRUE_DOWN:
-                        del self.possible_orientations[0]
+	socket_connection.sendall(ser_data)
 
-                elif self.true_orientation == TRUE_LEFT:
-                        del self.possible_orientations[3]
+	while not socket_connection.recv(1024):
+		print("Waiting for reply...")
 
-                elif self.true_orientation == TRUE_RIGHT:
-                        del self.possible_orientations[2]
+	print("Response recieved!")
 
 
-        def get_input(self):
-                user_input = False
-
-                while not user_input:
-                        user_input = raw_input("DIRECTION (u, d, l, r): ")
-                        
-                        if user_input == "u":
-                                user_input = TRUE_UP
-
-                        elif user_input == "d":
-                                user_input = TRUE_DOWN
-
-                        elif user_input == "l":
-                                user_input = TRUE_LEFT
-
-                        elif user_input == "r":
-                                user_input = TRUE_RIGHT
-
-                        #if user_input in self.possible_orientations:
-
-                        else:
-                                user_input = False
-                                print("Cannot go that direction.")
-
-                        self.true_goal = user_input
+def queue_control():
+	direction_queue = get_typed_direction_queue()
+	return(direction_queue)
 
 
-        def convert_true_to_relative(self):
-                if self.true_orientation == self.true_goal:
-                        self.relative_goal = STRAIGHT
-
-                elif self.true_orientation == TRUE_UP:
-                        if self.true_goal == TRUE_LEFT:
-                                self.relative_goal = LEFT
-
-                        else:
-                                self.relative_goal = RIGHT
-
-                elif self.true_orientation == TRUE_DOWN:
-                        if self.true_goal == TRUE_LEFT:
-                                self.relative_goal = RIGHT
-
-                        else:
-                                self.relative_goal = LEFT
-
-                elif self.true_orientation == TRUE_LEFT:
-                        if self.true_goal == TRUE_UP:
-                                self.relative_goal = RIGHT
-
-                        else:
-                                self.relative_goal = LEFT
-
-                elif self.true_orientation == TRUE_RIGHT:
-                        if self.true_goal == TRUE_UP:
-                                self.relative_goal = LEFT
-
-                        else:
-                                self.relative_goal = RIGHT
+def manual_control():
+	#control_values = get_controller_input()
+	#return(control_values)
+	print("NOT FINISHED")
 
 
-        def update_location(self):
-                if self.true_goal == TRUE_UP:
-                        self.grid[self.y][self.x] = 0
-                
-                        self.y -= 1
-                        print(self.x, self.y)
-                        self.grid[self.y][self.x] = 1
-
-                elif self.true_goal == TRUE_DOWN:
-                        self.grid[self.y][self.x] = 0
-
-                        self.y += 1
-                        print(self.x, self.y)
-                        self.grid[self.y][self.x] = 1
-
-                elif self.true_goal == TRUE_LEFT:
-                        self.grid[self.y][self.x] = 0
-
-                        self.x -= 1
-                        print(self.x, self.y)
-                        self.grid[self.y][self.x] = 1
-
-                elif self.true_goal == TRUE_RIGHT:
-                        self.grid[self.y][self.x] = 0
-
-                        self.x += 1
-                        print(self.x, self.y)
-                        self.grid[self.y][self.x] = 1
+def a_star():
+	#return(direction_queue)
+	print("NOT FINISHED")
 
 
-        def update_orientation(self):
-                self.true_orientation = self.true_goal
-
-
-        def run(self):
-                if self.mode == MANUAL_CONTROL:
-                        self.get_possible_orientations()
-                        self.get_input()
-                        self.convert_true_to_relative()
-                        self.update_location()
-                        self.update_orientation()
-                        print(self.grid)
-
+#pygame.init()
 
 socket_connection.connect((HOST_IP, PORT))
 connected = True
 
-robot = Robot_Handler(grid)
 while connected:
-        #robot.run()
+	if mode == QUEUE_CONTROL:
+		directions = queue_control()
+		directions.append(QUEUE_CONTROL)
 
-        turns = []
-        for i in range(10):
-                turn_direction = raw_input("left, right, straight: ")
-                turns.append(turn_direction)
-                
+	elif mode == MANUAL_CONTROL:
+		directions = manual_control()
+		directions.append(MANUAL_CONTROL)
 
-        data = turns 
-        data = pickle.dumps(data)
+	elif mode == A_STAR:
+		directions = a_star()
+		directions.append(A_STAR)
 
-        socket_connection.sendall(data)
+	else:
+		print("NOT A VALID MODE")
 
-        while not socket_connection.recv(1024):
-                print("Waiting for response...")
-
-        print("Response recieved!")
-
+	send_data(directions, socket_connection)
 
 socket_connection.send_all(DISCONNECT_MESSAGE)
 socket_connection.close()
