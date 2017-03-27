@@ -290,7 +290,6 @@ while not (ts.value() or ir.value() < 50):
 		for i in range(direction_queue_length):
 			turn_direction = direction_queue[i]
 
-			current_color = cl.value()
 			color_percents = detect_color()
 
 			if (color_percents[0] < ROAD_THRESHOLD) and (color_percents[2] < ROAD_THRESHOLD):
