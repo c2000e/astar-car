@@ -293,7 +293,7 @@ while not (ts.value() or ir.value() < 50):
 			print(i)
 			turn_direction = direction_queue[i]
 
-			while True:
+			while (ts.value() == 0) or (ir.value() > 50):
 				current_color = cl.value()
 				color_percents = detect_color()
 
