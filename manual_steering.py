@@ -282,13 +282,13 @@ socket.listen(1)
 connection, client_ip = socket.accept()
 print("Connected to ", client_ip)
 
-while not (ts.value() or ir.value() < 50):
+while True:
 	ser_direction_queue = connection.recv(1024)
 	direction_queue = pickle.loads(ser_direction_queue)
 
 	direction_queue_length = len(direction_queue) - 1
 
-	if (direction_queue[direction_queue_length] == QUEUE_CONTROL) or (direction_queue[direction_queue_length] == A_STAR):
+	if direction_queue[direction_queue_length] == QUEUE_CONTROL:
 		for i in range(direction_queue_length):
 			turn_direction = direction_queue[i]
 
