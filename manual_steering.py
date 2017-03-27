@@ -280,7 +280,7 @@ socket.listen(1)
 connection, client_ip = socket.accept()
 print("Connected to ", client_ip)
 
-while True:
+while not (ts.value() or ir.value() < 50):
 	ser_direction_queue = connection.recv(1024)
 	direction_queue = pickle.loads(ser_direction_queue)
 
@@ -290,20 +290,18 @@ while True:
 		for i in range(direction_queue_length):
 			turn_direction = direction_queue[i]
 
-			while not (ts.value() or ir.value() < 50):
-				print(ir.value())
-				current_color = cl.value()
-				color_percents = detect_color()
+			current_color = cl.value()
+			color_percents = detect_color()
 
-				if (color_percents[0] < ROAD_THRESHOLD) and (color_percents[2] < ROAD_THRESHOLD):
-					follow_road()
+			if (color_percents[0] < ROAD_THRESHOLD) and (color_percents[2] < ROAD_THRESHOLD):
+				follow_road()
 
-				elif color_percents[2] > RED_NODE_THRESHOLD:
-					handle_node(turn_direction)
-					break
+			elif color_percents[2] > RED_NODE_THRESHOLD:
+				handle_node(turn_direction)
+				break
 
-				else:
-					handle_failure()
+			else:
+				handle_failure()
 
 		connection.sendall(SUCCESS_MSG)
 
