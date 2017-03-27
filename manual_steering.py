@@ -130,6 +130,8 @@ def follow_road():
 	global error
 	global black_side
 
+	current_color = cl.value()
+
 	if current_color == BLACK:
 		error -= adjustment
 
@@ -289,7 +291,7 @@ while not (ts.value() or ir.value() < 50):
 	if (direction_queue[direction_queue_length] == QUEUE_CONTROL) or (direction_queue[direction_queue_length] == A_STAR):
 		for i in range(direction_queue_length):
 			turn_direction = direction_queue[i]
-
+			
 			color_percents = detect_color()
 
 			if (color_percents[0] < ROAD_THRESHOLD) and (color_percents[2] < ROAD_THRESHOLD):
