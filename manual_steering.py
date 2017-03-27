@@ -33,9 +33,9 @@ ROAD_THRESHOLD = 1
 RED_NODE_THRESHOLD = 0.3
 
 
-STRAIGHT = 0
-LEFT = 1
-RIGHT = 2
+STRAIGHT = "straight"
+LEFT = "left"
+RIGHT = "right"
 
 # Integer value between 0 and 1000 that limits the speed of the motors.
 MAX_SPEED = 360

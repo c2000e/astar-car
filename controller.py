@@ -40,7 +40,7 @@ def get_typed_direction_queue():
                 	break
 
                 elif user_input == "8":
-                	direction_queue = ["left", "left", "right", "right", "right", "right", "left"]
+                	direction_queue = [LEFT, LEFT, RIGHT, RIGHT, RIGHT, RIGHT, LEFT]
                 	break
 
                 else:
