@@ -298,11 +298,9 @@ while not (ts.value() or ir.value() < 50):
 				color_percents = detect_color()
 
 				if (color_percents[0] < ROAD_THRESHOLD) and (color_percents[2] < ROAD_THRESHOLD):
-					print("FOLLOWING ROAD")
 					follow_road()
 
 				elif color_percents[2] > RED_NODE_THRESHOLD:
-					print("HANDLING NODE")
 					handle_node(turn_direction)
 
 				else:
