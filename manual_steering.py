@@ -315,11 +315,6 @@ while not (ts.value() or ir.value() < 50):
 	else:
 		print("INVALID MODE")
 
-return_message = "Directions completed."
-return_message = pickle.dumps(return_message)
-connection.sendall(return_message)
-break
-
 
 
 # Stops the robot and notifies the user with a beep.
