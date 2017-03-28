@@ -313,7 +313,6 @@ while True:
 
 
 	elif direction_queue[direction_queue_length] == MANUAL_CONTROL:
-		print(direction_queue[0], direction_queue[1])
 		l_motor.speed_sp = MAX_SPEED
 		r_motor.speed_sp = MAX_SPEED
 

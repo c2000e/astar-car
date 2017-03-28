@@ -71,6 +71,8 @@ def queue_control():
 
 
 def manual_control():
+	global socket_connection
+
 	while True:
 		key = msvcrt.getwch()
 		print(key)
@@ -93,6 +95,7 @@ def manual_control():
 			right_motor = OFF
 
 		directions = pickle.dumps([left_motor, right_motor, MANUAL_CONTROL])
+		send_data(directions, socket_connection)
 
 
 def a_star():
