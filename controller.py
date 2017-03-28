@@ -94,7 +94,12 @@ def manual_control():
 			left_motor = OFF
 			right_motor = OFF
 
-		directions = pickle.dumps([left_motor, right_motor, MANUAL_CONTROL])
+		directions = [left_motor, right_motor, MANUAL_CONTROL]
+		print(directions)
+		directions = pickle.dumps(directions)
+		print(directions)
+		deserialized = pickle.loads(directions)
+		print(deserialized)
 		send_data(directions, socket_connection)
 
 

@@ -287,6 +287,7 @@ print("Connected to ", client_ip)
 
 while True:
 	ser_direction_queue = connection.recv(1024)
+	print(ser_direction_queue)
 	direction_queue = pickle.loads(ser_direction_queue)
 	print(direction_queue)
 
