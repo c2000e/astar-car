@@ -290,9 +290,7 @@ print("Connected to ", client_ip)
 
 while True:
 	ser_direction_queue = connection.recv(1024)
-	print(ser_direction_queue)
 	direction_queue = pickle.loads(ser_direction_queue)
-	print(direction_queue)
 
 	direction_queue_length = len(direction_queue) - 1
 
@@ -321,13 +319,13 @@ while True:
 		r_motor.speed_sp = MAX_SPEED
 
 		if direction_queue[LEFT_MOTOR] == ON:
-			l_motor.run_timed(time_sp = 1000)
+			l_motor.run_forever()
 
 		else:
 			l_motor.stop(stop_action = "hold")
 
 		if direction_queue[RIGHT_MOTOR] == ON:
-			r_motor.run_timed(time_sp = 1000)
+			r_motor.run_forever()
 
 		else:
 			r_motor.stop(stop_action = "hold")
