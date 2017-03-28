@@ -1,5 +1,5 @@
 import pickle
-import pygame
+import msvcrt
 import socket
 
 
@@ -21,7 +21,7 @@ DISCONNECT_MESSAGE = "DISCONNECT"
 
 SCREEN_DIMENSIONS = [500, 700]
 
-PYGAME_SETUP = FALSE
+PYGAME_SETUP = False
 
 
 mode = 1
@@ -31,27 +31,27 @@ socket_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 
 def get_typed_direction_queue():
-        user_input = False
-        possible_inputs = ["left", "right", "straight", "send"]
-        direction_queue = []
+	user_input = False
+	possible_inputs = ["left", "right", "straight", "send"]
+	direction_queue = []
 
-        while True:
-                user_input = raw_input("'left', 'right', or 'straight'. 'send' to deliver instructions to robot: ")
+	while True:
+		user_input = raw_input("'left', 'right', or 'straight'. 'send' to deliver instructions to robot: ")
 
-                if user_input in possible_inputs[0:3]:
-                	direction_queue.append(user_input)
+		if user_input in possible_inputs[0:3]:
+			direction_queue.append(user_input)
 
-                elif user_input == possible_inputs[3]:
-                	break
+		elif user_input == possible_inputs[3]:
+			break
 
-                elif user_input == "8":
-                	direction_queue = [LEFT, LEFT, RIGHT, RIGHT, RIGHT, RIGHT, LEFT]
-                	break
+		elif user_input == "8":
+			direction_queue = [LEFT, LEFT, RIGHT, RIGHT, RIGHT, RIGHT, LEFT]
+			break
 
-                else:
-                	print("Please input 'left', 'right', 'straight', or 'send'.")
+		else:
+			print("Please input 'left', 'right', 'straight', or 'send'.")
 
-        return(direction_queue)
+	return(direction_queue)
 
 
 def send_data(data, socket_connection):
@@ -71,46 +71,28 @@ def queue_control():
 
 
 def manual_control():
-	global PYGAME_SETUP
-	global socket_connection
+	while True:
+		key = msvcrt.getwch()
+		print(key)
 
-	if not PYGAME_SETUP:
-		pygame.init()
+		if key == "w":
+			print(key)
+			left_motor = ON
+			right_motor = ON
 
-		screen = pygame.display.set_mode(SCREEN_DIMENSIONS)
+		elif key == "a":
+			left_motor = ON
+			right_motor = OFF
 
-		pygame.display.set_caption("A* Car")
+		elif key == "d":
+			left_motor = OFF
+			right_motor = ON
 
-		running = True
+		else:
+			left_motor = OFF
+			right_motor = OFF
 
-		PYGAME_SETUP = True
-
-
-	else:
-		while running:
-			for event in pygame.event.get():
-				if event.type == pygame.QUIT:
-					running = False
-					pygame.quit()
-
-				if event.type == pygame.KEYDOWN:
-					if event.key == pygame.K_w:
-						left_wheel = ON
-						right_wheel = ON
-
-					#elif event.key == pygame.K_d:
-					#	right_wheel = ON
-
-					#elif event.key == pygame.K_a:
-					#	left_wheel = ON
-
-					else:
-						left_wheel = OFF
-						right_wheel = OFF
-
-				directions = pickle.dumps([left_wheel, right_wheel, MANUAL_CONTROL])
-
-				send_data(directions, socket_connection)
+		directions = pickle.dumps([left_motor, right_motor, MANUAL_CONTROL])
 
 
 def a_star():
@@ -125,19 +107,19 @@ while connected:
 	if mode == QUEUE_CONTROL:
 		directions = queue_control()
 		directions.append(QUEUE_CONTROL)
+		send_data(directions, socket_connection)
 
 	elif mode == MANUAL_CONTROL:
-		directions = manual_control()
-		directions.append(MANUAL_CONTROL)
+		manual_control()
 
 	elif mode == A_STAR:
 		directions = a_star()
 		directions.append(A_STAR)
+		send_data(directions, socket_connection)
 
 	else:
 		print("NOT A VALID MODE")
-
-	send_data(directions, socket_connection)
+		
 
 socket_connection.send_all(DISCONNECT_MESSAGE)
 socket_connection.close()
