@@ -319,13 +319,13 @@ while True:
 		r_motor.speed_sp = MAX_SPEED
 
 		if direction_queue[LEFT_MOTOR] == ON:
-			l_motor.run_timed(time_sp = 10)
+			l_motor.run_timed(time_sp = 100)
 
 		else:
 			l_motor.stop(stop_action = "hold")
 
 		if direction_queue[RIGHT_MOTOR] == ON:
-			r_motor.run_timed(time_sp = 10)
+			r_motor.run_timed(time_sp = 100)
 
 		else:
 			r_motor.stop(stop_action = "hold")
