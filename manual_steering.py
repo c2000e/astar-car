@@ -19,6 +19,9 @@ A_STAR = 2
 OFF = 0
 ON = 1
 
+LEFT_MOTOR = 0
+RIGHT_MOTOR = 1
+
 SUCCESS_MSG = pickle.dumps("Directions completed.")
 
 

@@ -19,13 +19,8 @@ STRAIGHT = "straight"
 
 DISCONNECT_MESSAGE = "DISCONNECT"
 
-SCREEN_DIMENSIONS = [500, 700]
-
-PYGAME_SETUP = False
-
 
 mode = 1
-is_robot_moving = False
 
 socket_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -95,11 +90,7 @@ def manual_control():
 			right_motor = OFF
 
 		directions = [left_motor, right_motor, MANUAL_CONTROL]
-		print(directions)
-		directions = pickle.dumps(directions)
-		print(directions)
-		deserialized = pickle.loads(directions)
-		print(deserialized)
+
 		send_data(directions, socket_connection)
 
 
