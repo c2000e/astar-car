@@ -70,10 +70,8 @@ def manual_control():
 
 	while True:
 		key = msvcrt.getwch()
-		print(key)
 
 		if key == "w":
-			print(key)
 			left_motor = ON
 			right_motor = ON
 
