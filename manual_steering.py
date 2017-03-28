@@ -332,6 +332,8 @@ while True:
 		else:
 			r_motor.stop(stop_action = "hold")
 
+		connection.sendall(SUCCESS_MSG)
+
 
 	else:
 		print("INVALID MODE")
