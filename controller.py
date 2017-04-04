@@ -7,11 +7,16 @@ QUEUE_CONTROL = 0
 MANUAL_CONTROL = 1
 A_STAR = 2
 
-HOST_IP = "209.114.104.245"
+HOST_IP = "209.114.107.188"
 PORT = 9999
 
 OFF = 0
 ON = 1
+
+NORTH = 0
+EAST = 1
+SOUTH = 2
+WEST = 3
 
 LEFT = "left"
 RIGHT = "right"
@@ -20,7 +25,8 @@ STRAIGHT = "straight"
 DISCONNECT_MESSAGE = "DISCONNECT"
 
 
-mode = 1
+mode = 0
+orientation = NORTH
 
 socket_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -76,12 +82,12 @@ def manual_control():
 			right_motor = ON
 
 		elif key == "a":
-			left_motor = ON
-			right_motor = OFF
-
-		elif key == "d":
 			left_motor = OFF
 			right_motor = ON
+
+		elif key == "d":
+			left_motor = ON
+			right_motor = OFF
 
 		else:
 			left_motor = OFF
@@ -93,8 +99,93 @@ def manual_control():
 
 
 def a_star():
-	#return(direction_queue)
-	print("NOT FINISHED")
+	starting_x = int(raw_input("start x: "))
+	starting_y = int(raw_input("start y: "))
+
+	ending_x = int(raw_input("end x: "))
+	ending_y = int(raw_input("end y: "))
+	ending_location = (ending_x, ending_y)
+
+	path = finder(starting_location, ending_location)
+
+	path_length = path[0]
+	path_coord = path[1]
+
+	direction_queue = []
+	for i in range(path_length):
+		if path_coord[i][X] < path_coord[i + 1][X]:
+	        if orientation == NORTH:
+	            turn_direction = RIGHT
+
+	        elif orientation == EAST:
+	            turn_direction = STRAIGHT
+
+	        elif orientation == SOUTH:
+	            turn_direction = LEFT
+
+	        else:
+	            print("ERROR")
+
+	    elif path_coord[i][X] > path_coord[i + 1][X]:
+	        if orientation == NORTH:
+	            turn_direction = LEFT
+
+	        elif orientation == SOUTH:
+	            turn_direction = RIGHT
+
+	        elif orientation == WEST:
+	            turn_direction == STRAIGHT
+
+	        else:
+	            print("ERROR")
+
+	    elif path_coord[i][Y] < path_coord[i + 1][Y]:
+	        if orientation == NORTH:
+	            turn_direction = STRAIGHT
+
+	        elif orientation == EAST:
+	            turn_direction = LEFT
+
+	        elif orientation == WEST:
+	            turn_direction = RIGHT
+
+	        else:
+	            print("ERROR")
+
+	    elif path_coord[i][Y] > path_coord[i + 1][Y]:
+	        if orientation == EAST:
+	            turn_direction = RIGHT
+
+	        elif orientation == SOUTH:
+	            turn_direction = STRAIGHT
+
+	        elif orientation == WEST:
+	            turn_direction = LEFT
+
+	        else:
+	            print("ERROR")
+
+	    else:
+	        print("error")
+
+
+	    if turn_direction == LEFT:
+	        if orientation == NORTH:
+	            orientation = WEST
+
+	        else:
+	            orientation -= 1
+
+	    elif turn_direction == RIGHT:
+	        if orientation == WEST:
+	            orientation = NORTH
+	            
+	        else:
+	            orientation += 1
+	            
+	    direction_queue.append(turn_direction)
+
+	return(direction_queue)
 
 
 socket_connection.connect((HOST_IP, PORT))
