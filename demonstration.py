@@ -100,31 +100,38 @@ while True:
 	# Runs only while the touch sensor is not activated and the infrared sensor doesn't detect anything within approximately 35 cm.
 	while True:
 		if btn.enter:
+			print("pause button")
 			stop_motors
 
 			sleep(1)
 			while True:
 				if btn.enter:
+					print("unpause button")
 					break
 
 				elif btn.backspace:
+					print("exit button")
 					exit()
 
 			sleep(1)
 
 		if (ts.value() or ir.value() < 50):
+			print("sensor pause")
 			stop_motors()
 
 			while True:
 				if btn.enter:
+					print("unpause button")
 					break
 
 				elif btn.backspace:
+					print("exit button")
 					exit()
 
 			sleep(1)
 
 		else:
+			print("following the line")
 			follow_line()
 			run_motors()
 
