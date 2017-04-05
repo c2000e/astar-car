@@ -101,7 +101,7 @@ while True:
 	while True:
 		if btn.enter:
 			print("pause button")
-			stop_motors
+			stop_motors()
 
 			sleep(1)
 			while True:
