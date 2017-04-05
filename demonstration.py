@@ -100,6 +100,8 @@ while True:
 	# Runs only while the touch sensor is not activated and the infrared sensor doesn't detect anything within approximately 35 cm.
 	while True:
 		if btn.enter:
+			stop_motors
+			
 			sleep(1)
 			while True:
 				if btn.enter:
@@ -115,6 +117,8 @@ while True:
 			run_motors()
 
 		else:
+			stop_motors()
+
 			while True:
 				if btn.enter:
 					break
