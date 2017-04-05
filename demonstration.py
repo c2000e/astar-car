@@ -14,7 +14,7 @@ TARGET_REFLECTION = 35
 
 # Float value greater than 0 that determines how severely the robot reacts to error.
 # Larger values cause larger corrections.
-ERROR_SCALE = 1.07
+ERROR_SCALE = 1.09
 
 # Boolean value (1 or -1) that determines whether the robot attempts to stay on the left or right side of a black line bordered
 # by a white line.
@@ -41,6 +41,8 @@ assert l_motor.connected, "Connect left motor to port B"
 
 r_motor = LargeMotor(OUTPUT_C)
 assert r_motor.connected, "Connect right motor to port C"
+
+btn = Button()
 
 
 # Sets color sensor to measure reflection intensity.
@@ -83,7 +85,6 @@ def follow_line():
 	elif l_speed < -MAX_SPEED:
 		l_speed = -MAX_SPEED
 
-
 	if r_speed > MAX_SPEED:
 		r_speed = MAX_SPEED
 
@@ -94,10 +95,35 @@ def follow_line():
 	l_motor.speed_sp = l_speed
 	r_motor.speed_sp = r_speed
 
-# Runs only while the touch sensor is not activated and the infrared sensor doesn't detect anything within approximately 35 cm.
-while not (ts.value() or ir.value() < 50):
-	follow_line()
-	run_motors()
+while True:
+
+	# Runs only while the touch sensor is not activated and the infrared sensor doesn't detect anything within approximately 35 cm.
+	while True:
+		if btn.enter:
+			sleep(1)
+			while True:
+				if btn.enter:
+					break
+
+				elif btn.backspace:
+					exit()
+
+			sleep(1)
+
+		if not (ts.value() or ir.value() < 50):
+			follow_line()
+			run_motors()
+
+		else:
+			while True:
+				if btn.enter:
+					break
+
+				elif btn.backspace:
+					exit()
+
+			sleep(1)
+
 
 # Stops the robot and notifies the user with a beep.
 stop_motors()
