@@ -70,8 +70,7 @@ def follow_line():
 	# Calculates error based on a target reflection value and actual reflection value.
 	# This value is multiplied by a float (ERROR_SCALE) that allows adjustment of how severely the robot reacts to errors.
 	error = (TARGET_REFLECTION - cl.value()) * ERROR_SCALE
-	print(error)
-
+	
 	# Modeled after ev3 steering function; y = (7.2 * Steering) + Power.
 	# "Steering" becomes "error" and "Power" becomes MAX_SPEED.
 	# The direction variable changes whether the sensor tracks the right or left side of a black line bordered by a white line.
