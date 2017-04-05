@@ -14,7 +14,7 @@ TARGET_REFLECTION = 35
 
 # Float value greater than 0 that determines how severely the robot reacts to error.
 # Larger values cause larger corrections.
-ERROR_SCALE = 1.15
+ERROR_SCALE = 1.07
 
 # Boolean value (1 or -1) that determines whether the robot attempts to stay on the left or right side of a black line bordered
 # by a white line.
@@ -68,18 +68,27 @@ def follow_line():
 	# Calculates error based on a target reflection value and actual reflection value.
 	# This value is multiplied by a float (ERROR_SCALE) that allows adjustment of how severely the robot reacts to errors.
 	error = (TARGET_REFLECTION - cl.value()) * ERROR_SCALE
+	print(error)
 
 	# Modeled after ev3 steering function; y = (7.2 * Steering) + Power.
 	# "Steering" becomes "error" and "Power" becomes MAX_SPEED.
 	# The direction variable changes whether the sensor tracks the right or left side of a black line bordered by a white line.
-	l_speed = (-LEGO_SLOPE * error) + MAX_SPEED
-	r_speed = (LEGO_SLOPE * error) + MAX_SPEED
+	l_speed = (LEGO_SLOPE * error) + MAX_SPEED
+	r_speed = (-LEGO_SLOPE * error) + MAX_SPEED
 
 	# Limits both motors to a maximum speed, similar to the original ev3 software.
-	#if l_speed > MAX_SPEED:
-	#	l_speed = MAX_SPEED
-	#if r_speed > MAX_SPEED:
-	#	r_speed = MAX_SPEED
+	if l_speed > MAX_SPEED:
+		l_speed = MAX_SPEED
+
+	elif l_speed < -MAX_SPEED:
+		l_speed = -MAX_SPEED
+
+
+	if r_speed > MAX_SPEED:
+		r_speed = MAX_SPEED
+
+	elif r_speed < -MAX_SPEED:
+		r_speed = -MAX_SPEED
 	
 	# Sets motors to run at their calculated speed.
 	l_motor.speed_sp = l_speed

@@ -48,18 +48,21 @@ def stop_motors():
 
 while True:
 	while (ir.value() > 50) and (ts.value != 1):
-		error = (target_reflection - cl.value())
+		error = (TARGET_REFLECTION - cl.value())
 		print(error)
 
-		#if error > 70:
-		#	l_speed = 0
+		if error < -35:
+			l_speed = 0
+			r_speed = (-LEGO_SLOPE * error) + MAX_SPEED
+		elif error > 28:
+			r_speed = 0
+			l_speed = (LEGO_SLOPE * error) + MAX_SPEED
+		else:
+			l_speed = (LEGO_SLOPE * error) + MAX_SPEED
+			r_speed = (-LEGO_SLOPE * error) + MAX_SPEED
 
-
-		l_speed = MAX_SPEED * error
-		r_speed = MAX_SPEED * error
-
-		#l_speed = (LEGO_SLOPE * error) + MAX_SPEED
-		#r_speed = (-LEGO_SLOPE * error) + MAX_SPEED
+		l_speed = (LEGO_SLOPE * error) + MAX_SPEED
+		r_speed = (-LEGO_SLOPE * error) + MAX_SPEED
 
 		if l_speed > MAX_SPEED:
 			l_speed = MAX_SPEED
