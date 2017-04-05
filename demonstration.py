@@ -101,7 +101,7 @@ while True:
 	while True:
 		if btn.enter:
 			stop_motors
-			
+
 			sleep(1)
 			while True:
 				if btn.enter:
@@ -112,11 +112,7 @@ while True:
 
 			sleep(1)
 
-		if not (ts.value() or ir.value() < 50):
-			follow_line()
-			run_motors()
-
-		else:
+		if (ts.value() or ir.value() < 50):
 			stop_motors()
 
 			while True:
@@ -127,6 +123,11 @@ while True:
 					exit()
 
 			sleep(1)
+
+		else:
+			follow_line()
+			run_motors()
+
 
 
 # Stops the robot and notifies the user with a beep.
