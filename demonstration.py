@@ -5,8 +5,9 @@ from time import sleep
 
 LEGO_SLOPE = 7.2
 
-# Integer value between 0 and 1000 that limits the speed of the motors.
+# Integer values between 0 and 1000 that limits the speed of the motors.
 MAX_SPEED = 180
+
 MIN_SPEED = 60
 
 # Integer value between 0 and 100 that the robot tries to get the color sensor (in reflection mode) to return.
