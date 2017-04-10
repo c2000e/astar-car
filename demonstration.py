@@ -7,6 +7,7 @@ LEGO_SLOPE = 7.2
 
 # Integer value between 0 and 1000 that limits the speed of the motors.
 MAX_SPEED = 180
+MIN_SPEED = 60
 
 # Integer value between 0 and 100 that the robot tries to get the color sensor (in reflection mode) to return.
 # 35 is the approximate reflection value above the intersection of a white and black line.
@@ -81,14 +82,14 @@ def follow_line():
 	if l_speed > MAX_SPEED:
 		l_speed = MAX_SPEED
 
-	elif l_speed < -MAX_SPEED:
-		l_speed = -MAX_SPEED
+	elif l_speed < MIN_SPEED:
+		l_speed = MIN_SPEED
 
 	if r_speed > MAX_SPEED:
 		r_speed = MAX_SPEED
 
-	elif r_speed < -MAX_SPEED:
-		r_speed = -MAX_SPEED
+	elif r_speed < MIN_SPEED:
+		r_speed = MIN_SPEED
 	
 	# Sets motors to run at their calculated speed.
 	l_motor.speed_sp = l_speed
