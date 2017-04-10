@@ -12,7 +12,7 @@ MIN_SPEED = 60
 
 # Integer value between 0 and 100 that the robot tries to get the color sensor (in reflection mode) to return.
 # 35 is the approximate reflection value above the intersection of a white and black line.
-TARGET_REFLECTION = 35
+TARGET_REFLECTION = 37
 
 # Float value greater than 0 that determines how severely the robot reacts to error.
 # Larger values cause larger corrections.
