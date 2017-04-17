@@ -332,10 +332,27 @@ while True:
 
 		connection.sendall(SUCCESS_MSG)
 
+	if direction_queue[direction_queue_length] == A_STAR:
+		for i in range(direction_queue_length):
+			turn_direction = direction_queue[i]
+
+			while True:
+				color_percents = detect_color()
+
+				if (color_percents[0] < ROAD_THRESHOLD) and (color_percents[2] < ROAD_THRESHOLD):
+					follow_road()
+
+				elif color_percents[2] > RED_NODE_THRESHOLD:
+					handle_node(turn_direction)
+					break
+
+				else:
+					handle_failure()
+
+		connection.sendall(SUCCESS_MSG)
 
 	else:
 		print("INVALID MODE")
-
 
 
 # Stops the robot and notifies the user with a beep.

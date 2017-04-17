@@ -1,5 +1,4 @@
 from pypaths import astar
-finder = astar.pathfinder()
 
 X = 0
 Y = 1
@@ -13,7 +12,7 @@ LEFT = "left"
 STRAIGHT = "straight"
 RIGHT = "right"
 
-GRID_HEIGHT = 4
+GRID_HEIGHT = 6
 GRID_WIDTH = 6
 
 orientation = NORTH
@@ -25,31 +24,51 @@ for y in range(GRID_HEIGHT):
         node_coord = (x, y)
         possible_nodes.append(node_coord)
 
-target_node_id = -1
-while target_node_id == -1:
-    target_node_id = int(raw_input("target node [0 - 25]: "))
-    if target_node_id <= 0:
-        target_node_id = -1
 
-    elif target_node_id > 23:
-        if target_node_id == 24:
-            target_node_id = 0
-            #go_home()
+def grid_neighbors(height, width):
+    def func(coord):
+        neighbor_list = [(coord[X], coord[Y] + 1),
+                         (coord[X], coord[Y] - 1),
+                         (coord[X] + 1, coord[Y]),
+                         (coord[X] - 1, coord[Y])]
 
-        elif target_node_id == 25:
-            target_node_id = 23
-            #go_home()
+        if coord[Y] % 2 == 0:
+            del neighbor_list[3]
+            del neighbor_list[2]
+            
+            if coord[Y] <= 0:
+                del neighbor_list[1]
+
+            if coord[Y] + 1 >= height:
+                del neighbor_list[0]
 
         else:
-            target_node_id = -1
-            print("Invalid input.")
+            if coord[X] - 1 <= 0:
+                del neighbor_list[3]
 
-    else:
+            if coord[X] + 1 >= width:
+                del neighbor_list[2]
+
+        return [c for c in neighbor_list
+                if c != coord
+                and c[0] >= 0 and c[0] < width
+                and c[1] >= 0 and c[1] < height]
+
+    return func
+
+target_node_id = -1
+while target_node_id == -1:
+    target_node_id = int(raw_input("target node [0 - 35]: "))
+    if target_node_id in range(GRID_WIDTH * GRID_HEIGHT):
         print("Input accepted")
-            
+        
+    else:
+        target_node_id = -1
+        print("Invalid input")
 
 target_node = possible_nodes[target_node_id]
 
+finder = astar.pathfinder(neighbors = grid_neighbors(GRID_HEIGHT, GRID_WIDTH))
 path = finder(starting_node, target_node)
 
 path_length = path[0]
@@ -128,6 +147,8 @@ for i in range(path_length):
             orientation += 1
             
     direction_queue.append(turn_direction)
+
+starting_node = target_node
         
 print(path)
 print(direction_queue)
