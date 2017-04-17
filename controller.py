@@ -10,6 +10,9 @@ A_STAR = 2
 HOST_IP = "209.114.107.188"
 PORT = 9999
 
+GRID_HEIGHT = 6
+GRID_WIDTH = 6
+
 OFF = 0
 ON = 1
 
@@ -24,9 +27,15 @@ STRAIGHT = "straight"
 
 DISCONNECT_MESSAGE = "DISCONNECT"
 
-
 mode = 0
 orientation = NORTH
+starting_node = (0,0)
+
+possible_nodes = []
+for y in range(GRID_HEIGHT):
+    for x in range(GRID_WIDTH):
+        node_coord = (x, y)
+        possible_nodes.append(node_coord)
 
 socket_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -97,15 +106,24 @@ def manual_control():
 
 		send_data(directions, socket_connection)
 
-
 def a_star():
-	starting_x = int(raw_input("start x: "))
-	starting_y = int(raw_input("start y: "))
+	#starting_x = int(raw_input("start x: "))
+	#starting_y = int(raw_input("start y: "))
+	starting_location = (0,0)
 
-	ending_x = int(raw_input("end x: "))
-	ending_y = int(raw_input("end y: "))
-	ending_location = (ending_x, ending_y)
+	target_node_id = -1
+	while target_node_id == -1:
+    	target_node_id = int(raw_input("target node [0 - 35]: "))
+    	if target_node_id in range(GRID_WIDTH * GRID_HEIGHT):
+        	print("Input accepted")
+        
+    	else:
+        	target_node_id = -1
+        	print("Invalid input")
 
+    target_node = possible_nodes[target_node_id]
+
+    finder = astar.pathfinder(neighbors = grid_neighbors(GRID_HEIGHT, GRID_WIDTH))
 	path = finder(starting_location, ending_location)
 
 	path_length = path[0]
@@ -186,6 +204,37 @@ def a_star():
 	    direction_queue.append(turn_direction)
 
 	return(direction_queue)
+
+def grid_neighbors(height, width):
+    def func(coord):
+        neighbor_list = [(coord[X], coord[Y] + 1),
+                         (coord[X], coord[Y] - 1),
+                         (coord[X] + 1, coord[Y]),
+                         (coord[X] - 1, coord[Y])]
+
+        if coord[Y] % 2 == 0:
+            del neighbor_list[3]
+            del neighbor_list[2]
+            
+            if coord[Y] <= 0:
+                del neighbor_list[1]
+
+            if coord[Y] + 1 >= height:
+                del neighbor_list[0]
+
+        else:
+            if coord[X] - 1 <= 0:
+                del neighbor_list[3]
+
+            if coord[X] + 1 >= width:
+                del neighbor_list[2]
+
+        return [c for c in neighbor_list
+                if c != coord
+                and c[0] >= 0 and c[0] < width
+                and c[1] >= 0 and c[1] < height]
+
+    return func
 
 
 socket_connection.connect((HOST_IP, PORT))
