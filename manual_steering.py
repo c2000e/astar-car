@@ -28,14 +28,14 @@ SUCCESS_MSG = pickle.dumps("Directions completed.")
 # Constants for colors that should be recognized by the program
 UNKNOWN = 0
 BLACK = 1
-RED = 5
+RED = 4
 WHITE = 6
 
 COLORS = [UNKNOWN, BLACK, RED, WHITE]
 
 COLOR_MEMORY_LENGTH = 10
 
-ROAD_THRESHOLD = 1
+ROAD_THRESHOLD = 1.1
 RED_NODE_THRESHOLD = 0.3
 
 
@@ -50,7 +50,7 @@ MAX_SPEED = 360
 error = 0
 
 # Float value that determines how severely the robot reacts to being in the wrong location.
-adjustment = 0.05
+adjustment = 0.1
 
 # Integer value that the robot tries to match with its gyroscope reading during turns.
 heading = 0
@@ -301,10 +301,10 @@ while True:
 			while True:
 				color_percents = detect_color()
 
-				if (color_percents[0] < ROAD_THRESHOLD) and (color_percents[2] < ROAD_THRESHOLD):
+				if (color_percents[0] < ROAD_THRESHOLD) and (color_percents[2] < RED_NODE_THRESHOLD):
 					follow_road()
 
-				elif color_percents[2] > RED_NODE_THRESHOLD:
+				elif color_percents[2] >= RED_NODE_THRESHOLD:
 					handle_node(turn_direction)
 					break
 
@@ -339,10 +339,10 @@ while True:
 			while True:
 				color_percents = detect_color()
 
-				if (color_percents[0] < ROAD_THRESHOLD) and (color_percents[2] < ROAD_THRESHOLD):
+				if (color_percents[0] < ROAD_THRESHOLD) and (color_percents[2] < RED_NODE_THRESHOLD):
 					follow_road()
 
-				elif color_percents[2] > RED_NODE_THRESHOLD:
+				elif color_percents[2] >= RED_NODE_THRESHOLD:
 					handle_node(turn_direction)
 					break
 
