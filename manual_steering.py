@@ -332,7 +332,7 @@ while True:
 
 		connection.sendall(SUCCESS_MSG)
 
-	if direction_queue[direction_queue_length] == A_STAR:
+	elif direction_queue[direction_queue_length] == A_STAR:
 		for i in range(direction_queue_length):
 			turn_direction = direction_queue[i]
 
@@ -356,6 +356,7 @@ while True:
 					follow_road()
 
 				elif color_percents[2] >= NODE_THRESHOLD:
+					stop_motors()
 					break
 
 				else:
