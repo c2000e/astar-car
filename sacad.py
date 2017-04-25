@@ -13,39 +13,39 @@ while not btn.any():
 	l_motor.run_timed(time_sp = 1000, speed_sp = 360)
 	r_motor.run_timed(time_sp = 1000, speed_sp = 100)
 
-	sleep(1000)
+	sleep(1)
 
 	l_motor.run_timed(time_sp = 1000, speed_sp = 360)
 	r_motor.run_timed(time_sp = 1000, speed_sp = 100)
 
-	sleep(1000)
+	sleep(1)
 
 	l_motor.run_timed(time_sp = 1000, speed_sp = 360)
 	r_motor.run_timed(time_sp = 1000, speed_sp = 100)
 
-	sleep(1000)
+	sleep(1)
 
 	l_motor.run_timed(time_sp = 1000, speed_sp = 360)
 	r_motor.run_timed(time_sp = 1000, speed_sp = 100)
 
-	sleep(1000)
+	sleep(1)
 
 	r_motor.run_timed(time_sp = 1000, speed_sp = 360)
 	l_motor.run_timed(time_sp = 1000, speed_sp = 100)
 
-	sleep(1000)
+	sleep(1)
 
 	r_motor.run_timed(time_sp = 1000, speed_sp = 360)
 	l_motor.run_timed(time_sp = 1000, speed_sp = 100)
 
-	sleep(1000)
+	sleep(1)
 
 	r_motor.run_timed(time_sp = 1000, speed_sp = 360)
 	l_motor.run_timed(time_sp = 1000, speed_sp = 100)
 
-	sleep(1000)
+	sleep(1)
 
 	r_motor.run_timed(time_sp = 1000, speed_sp = 360)
 	l_motor.run_timed(time_sp = 1000, speed_sp = 100)
 
-	sleep(1000)
+	sleep(1)
