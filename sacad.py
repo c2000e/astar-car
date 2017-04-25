@@ -7,6 +7,8 @@ assert l_motor.connected, "Connect left motor to port B."
 r_motor = LargeMotor(OUTPUT_C)
 assert r_motor.connected, "Connect right motor to port C."
 
+btn = Button()
+
 while not btn.any():
 	l_motor.run_timed(time_sp = 1000, speed_sp = 360)
 
