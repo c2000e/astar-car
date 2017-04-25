@@ -125,6 +125,7 @@ def a_star():
     r = requests.get(complete_url)
 
     target_node_id = int(r.content)
+    print(target_node_id)
     target_node = possible_nodes[target_node_id]
 
     finder = astar.pathfinder(neighbors = grid_neighbors(GRID_HEIGHT, GRID_WIDTH))
@@ -132,6 +133,7 @@ def a_star():
 
     path_length = path[0]
     path_coord = path[1]
+    print(path_coord)
 
     direction_queue = []
     for i in range(path_length):
