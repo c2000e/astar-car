@@ -28,15 +28,15 @@ SUCCESS_MSG = pickle.dumps("Directions completed.")
 # Constants for colors that should be recognized by the program
 UNKNOWN = 0
 BLACK = 1
-RED = 4
+YELLOW = 4
 WHITE = 6
 
-COLORS = [UNKNOWN, BLACK, RED, WHITE]
+COLORS = [UNKNOWN, BLACK, YELLOW, WHITE]
 
 COLOR_MEMORY_LENGTH = 10
 
 ROAD_THRESHOLD = 1.1
-RED_NODE_THRESHOLD = 0.3
+NODE_THRESHOLD = 0.3
 
 
 STRAIGHT = "straight"
@@ -125,10 +125,10 @@ def detect_color():
 
 	percent_unknown = past_colors.count(UNKNOWN) / len(past_colors)
 	percent_black = past_colors.count(BLACK) / len(past_colors)
-	percent_red = past_colors.count(RED) / len(past_colors)
+	percent_yellow = past_colors.count(YELLOW) / len(past_colors)
 	percent_white = past_colors.count(WHITE) / len(past_colors)
 
-	return(percent_unknown, percent_black, percent_red, percent_white)
+	return(percent_unknown, percent_black, percent_yellow, percent_white)
 
 
 # Changes the speed of the motors to make the robot follow a line.
@@ -301,10 +301,10 @@ while True:
 			while True:
 				color_percents = detect_color()
 
-				if (color_percents[0] < ROAD_THRESHOLD) and (color_percents[2] < RED_NODE_THRESHOLD):
+				if (color_percents[0] < ROAD_THRESHOLD) and (color_percents[2] < NODE_THRESHOLD):
 					follow_road()
 
-				elif color_percents[2] >= RED_NODE_THRESHOLD:
+				elif color_percents[2] >= NODE_THRESHOLD:
 					handle_node(turn_direction)
 					break
 
@@ -339,15 +339,28 @@ while True:
 			while True:
 				color_percents = detect_color()
 
-				if (color_percents[0] < ROAD_THRESHOLD) and (color_percents[2] < RED_NODE_THRESHOLD):
+				if (color_percents[0] < ROAD_THRESHOLD) and (color_percents[2] < NODE_THRESHOLD):
 					follow_road()
 
-				elif color_percents[2] >= RED_NODE_THRESHOLD:
+				elif color_percents[2] >= NODE_THRESHOLD:
 					handle_node(turn_direction)
 					break
 
 				else:
 					handle_failure()
+
+			while turn_direction == direction_queue[direction_queue_length - 1]:
+				color_percents = detect_color()
+
+				if (color_percents[0] < ROAD_THRESHOLD) and (color_percents[2] < NODE_THRESHOLD):
+					follow_road()
+
+				elif color_percents[2] >= NODE_THRESHOLD:
+					break
+
+				else:
+					handle_failure()
+
 
 		connection.sendall(SUCCESS_MSG)
 

@@ -1,6 +1,7 @@
-mport pickle
+import pickle
 import msvcrt
 import socket
+import requests
 
 
 QUEUE_CONTROL = 0
@@ -26,6 +27,8 @@ RIGHT = "right"
 STRAIGHT = "straight"
 
 DISCONNECT_MESSAGE = "DISCONNECT"
+
+BASE_URL = "http://bigcat.fhsu.edu/newmedia/projects/stacks/robotStackToNode.php?stackID="
 
 mode = 0
 orientation = NORTH
@@ -111,16 +114,12 @@ def a_star():
 	#starting_y = int(raw_input("start y: "))
 	starting_location = (0,0)
 
-	target_node_id = -1
-	while target_node_id == -1:
-    	target_node_id = int(raw_input("target node [0 - 35]: "))
-    	if target_node_id in range(GRID_WIDTH * GRID_HEIGHT):
-        	print("Input accepted")
-        
-    	else:
-        	target_node_id = -1
-        	print("Invalid input")
+    target_stack_id = int(raw_input("target stack id: "))
+    complete_url = BASE_URL + target_stack_id
 
+    r = requests.get("complete_url")
+
+    target_node = r.content
     target_node = possible_nodes[target_node_id]
 
     finder = astar.pathfinder(neighbors = grid_neighbors(GRID_HEIGHT, GRID_WIDTH))
@@ -204,6 +203,7 @@ def a_star():
 	    direction_queue.append(turn_direction)
 
 	return(direction_queue)
+
 
 def grid_neighbors(height, width):
     def func(coord):
