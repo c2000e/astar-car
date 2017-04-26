@@ -13,7 +13,7 @@ assert rc.connected, "Can't detect remote control."
 
 btn = Button()
 
-while not btn.any():
+while not (btn.any() or rc.on_red_up):
 	l_motor.run_timed(time_sp = 4000, speed_sp = 480)
 	r_motor.run_timed(time_sp = 4000, speed_sp = 100)
 	r_motor.wait_while("running")
@@ -21,3 +21,5 @@ while not btn.any():
 	r_motor.run_timed(time_sp = 4000, speed_sp = 480)
 	l_motor.run_timed(time_sp = 4000, speed_sp = 100)
 	l_motor.wait_while("running")
+
+	rc.process()
