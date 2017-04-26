@@ -11,10 +11,10 @@ assert r_motor.connected, "Connect right motor to port C."
 btn = Button()
 
 while not btn.any():
-	l_motor.run_timed(time_sp = 4000, speed_sp = 440)
+	l_motor.run_timed(time_sp = 4000, speed_sp = 480)
 	r_motor.run_timed(time_sp = 4000, speed_sp = 100)
 	r_motor.wait_while("running")
 
-	r_motor.run_timed(time_sp = 4000, speed_sp = 440)
+	r_motor.run_timed(time_sp = 4000, speed_sp = 480)
 	l_motor.run_timed(time_sp = 4000, speed_sp = 100)
 	l_motor.wait_while("running")
