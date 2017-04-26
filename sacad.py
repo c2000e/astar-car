@@ -8,6 +8,9 @@ assert l_motor.connected, "Connect left motor to port B."
 r_motor = LargeMotor(OUTPUT_C)
 assert r_motor.connected, "Connect right motor to port C."
 
+rc = RemoteControl()
+assert rc.connected, "Can't detect remote control."
+
 btn = Button()
 
 while not btn.any():
