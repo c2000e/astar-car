@@ -335,6 +335,10 @@ while True:
 		directions.append(A_STAR)
 		send_data(directions, socket_connection)
 
+		print("Waiting for robot to reach destination.")
+		socket_connection.recv(1024)
+		print("Robot returned home.")
+
 
 	else:
 		print("NOT A VALID MODE")
