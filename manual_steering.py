@@ -39,9 +39,10 @@ ROAD_THRESHOLD = 1.1
 NODE_THRESHOLD = 0.3
 
 
-STRAIGHT = "straight"
 LEFT = "left"
 RIGHT = "right"
+STRAIGHT = "straight"
+REVERSE = "reverse"
 
 # Integer value between 0 and 1000 that limits the speed of the motors.
 MAX_SPEED = 360
@@ -94,6 +95,7 @@ cl.mode = "COL-COLOR"
 # 0% is equivalent to 0 cm and 100% is approximately 70 cm.
 ir.mode = "IR-PROX"
 
+
 socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 
@@ -105,11 +107,11 @@ def run_motors():
 
 # Forces both motors to stop immediately.
 def stop_motors():
-	l_motor.stop(stop_action = "hold")
-	r_motor.stop(stop_action = "hold")
-
 	l_motor.speed_sp = 0
 	r_motor.speed_sp = 0
+
+	l_motor.stop(stop_action = "hold")
+	r_motor.stop(stop_action = "hold")
 
 
 def detect_color():
@@ -174,8 +176,6 @@ def handle_node(turn_direction):
 
 	stop_motors()
 
-	#turn_direction = get_directions()
-
 	if turn_direction != STRAIGHT:
 		turn(turn_direction)
 
@@ -220,37 +220,47 @@ def turn(turn_direction):
 	while not turn_complete:
 		if black_side == 1:
 			if turn_direction == LEFT:
-				if not turn_complete:
-					if current_color != BLACK:
-						l_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
-						r_motor.speed_sp = MAX_SPEED
-					else:
-						turn_complete = True
+				if current_color != BLACK:
+					l_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
+					r_motor.speed_sp = MAX_SPEED
+				else:
+					turn_complete = True
 
 			elif turn_direction == RIGHT:
-				if not turn_complete:
-					if current_color != WHITE:
-						l_motor.speed_sp = MAX_SPEED
-						r_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
-					else:
-						turn_complete = True
+				if current_color != WHITE:
+					l_motor.speed_sp = MAX_SPEED
+					r_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
+				else:
+					turn_complete = True
+
+			elif turn_direction == REVERSE:
+				if current_color != BLACK:
+					l_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
+					r_motor.speed_sp = MAX_SPEED
+				else:
+					turn_complete = True
 
 		elif black_side == -1:
 			if turn_direction == LEFT:
-				if not turn_complete:
-					if current_color != WHITE:
-						l_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
-						r_motor.speed_sp = MAX_SPEED
-					else:
-						turn_complete = True	
+				if current_color != WHITE:
+					l_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
+					r_motor.speed_sp = MAX_SPEED
+				else:
+					turn_complete = True	
 
 			elif turn_direction == RIGHT:
-				if not turn_complete:
-					if current_color != BLACK:
-						l_motor.speed_sp = MAX_SPEED
-						r_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
-					else:
-						turn_complete = True	
+				if current_color != BLACK:
+					l_motor.speed_sp = MAX_SPEED
+					r_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
+				else:
+					turn_complete = True
+
+			elif turn_direction == REVERSE:
+				if current_color != WHITE:
+					l_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
+					r_motor.speed_sp = MAX_SPEED
+				else:
+					turn_complete = True	
 
 
 		run_motors()
@@ -285,16 +295,24 @@ def exit_node():
 
 socket.bind((HOST, PORT))
 socket.listen(1)
-connection, client_ip = socket.accept()
+socket_connection, client_ip = socket.accept()
 print("Connected to ", client_ip)
 
 while True:
-	ser_direction_queue = connection.recv(1024)
-	direction_queue = pickle.loads(ser_direction_queue)
+	ser_direction_queue = socket_connection.recv(1024)
 
+	# Error checking needs to happen between here...
+
+	direction_queue = pickle.loads(ser_direction_queue)
 	direction_queue_length = len(direction_queue) - 1
 
-	if direction_queue[direction_queue_length] == QUEUE_CONTROL:
+	# ...and here
+
+	socket_connection.sendall(SUCCESS_MSG)
+
+	mode = direction_queue[direction_queue_length]
+
+	if mode == QUEUE_CONTROL:
 		for i in range(direction_queue_length):
 			turn_direction = direction_queue[i]
 
@@ -311,10 +329,8 @@ while True:
 				else:
 					handle_failure()
 
-		connection.sendall(SUCCESS_MSG)
 
-
-	elif direction_queue[direction_queue_length] == MANUAL_CONTROL:
+	elif mode == MANUAL_CONTROL:
 		l_motor.speed_sp = MAX_SPEED
 		r_motor.speed_sp = MAX_SPEED
 
@@ -330,11 +346,11 @@ while True:
 		else:
 			r_motor.stop(stop_action = "hold")
 
-		connection.sendall(SUCCESS_MSG)
 
-	elif direction_queue[direction_queue_length] == A_STAR:
-		for i in range(direction_queue_length):
-			turn_direction = direction_queue[i]
+	elif mode == A_STAR:
+		for i in range(direction_queue_length + 1):
+			if i < direction_queue_length:
+				turn_direction = direction_queue[i]
 
 			while True:
 				color_percents = detect_color()
@@ -343,27 +359,20 @@ while True:
 					follow_road()
 
 				elif color_percents[2] >= NODE_THRESHOLD:
-					handle_node(turn_direction)
-					break
+					if i < direction_queue_length:
+						handle_node(turn_direction)
+						stop_motors()
+						break
+
+					else:
+						stop_motors()
+						break
 
 				else:
 					handle_failure()
-
-			while turn_direction == direction_queue[direction_queue_length - 1]:
-				color_percents = detect_color()
-
-				if (color_percents[0] < ROAD_THRESHOLD) and (color_percents[2] < NODE_THRESHOLD):
-					follow_road()
-
-				elif color_percents[2] >= NODE_THRESHOLD:
-					stop_motors()
 					break
 
-				else:
-					handle_failure()
-
-
-		connection.sendall(SUCCESS_MSG)
+		socket_connection.sendall(SUCCESS_MSG)
 
 	else:
 		print("INVALID MODE")

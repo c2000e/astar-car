@@ -1,48 +1,64 @@
-import pickle
 import msvcrt
-import socket
+import pickle
 import requests
+import socket
+
 from pypaths import astar
 
 
+# Possible modes
 QUEUE_CONTROL = 0
 MANUAL_CONTROL = 1
 A_STAR = 2
 
+# HOST_IP needs to match ev3's
 HOST_IP = "209.114.105.11"
 PORT = 9999
 
+# Dimensions of grid
 GRID_HEIGHT = 6
 GRID_WIDTH = 6
 
+# For readability
 OFF = 0
 ON = 1
 
+# Makes list indexing easier to read
 X = 0
 Y = 1
 
+# Makes orientation easier to understand
 NORTH = 0
 EAST = 1
 SOUTH = 2
 WEST = 3
 
+# Switch to numbers? Used to cause issues, need to check if still issue
 LEFT = "left"
 RIGHT = "right"
 STRAIGHT = "straight"
+REVERSE = "reverse"
 
+# List of all nodes within the grid dimensions
+VALID_NODES = []
+for y in range(GRID_HEIGHT):
+    for x in range(GRID_WIDTH):
+        node_coord = (x, y)
+        VALID_NODES.append(node_coord)
+
+# Tuple that holds coordinates for where the robot should return
+HOME_NODE = (0, 0)
+
+# Partial URL for library database
+BASE_URL = "http://bigcat.fhsu.edu/newmedia/projects/stacks/robotStackToNode.php?stackID="
+
+# Socket connections require a string to be sent when the connection ends
 DISCONNECT_MESSAGE = "DISCONNECT"
 
-BASE_URL = "http://bigcat.fhsu.edu/newmedia/projects/stacks/robotStackToNode.php?stackID="
 
 mode = 2
 orientation = NORTH
 starting_node = (0,0)
-
-possible_nodes = []
-for y in range(GRID_HEIGHT):
-    for x in range(GRID_WIDTH):
-        node_coord = (x, y)
-        possible_nodes.append(node_coord)
 
 socket_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -79,7 +95,7 @@ def send_data(data, socket_connection):
 	while not socket_connection.recv(1024):
 		print("Waiting for reply...")
 
-	print("Response recieved!")
+	print("Directions sent successfully")
 
 
 def queue_control():
@@ -113,110 +129,27 @@ def manual_control():
 
 		send_data(directions, socket_connection)
 
-def a_star():
-    global orientation
-    #starting_x = int(raw_input("start x: "))
-    #starting_y = int(raw_input("start y: "))
-    starting_location = (0,0)
 
-    target_stack_id = raw_input("target stack id: ")
-    complete_url = BASE_URL + target_stack_id
+def get_target_node():
+	target_node = None
 
-    r = requests.get(complete_url)
+	while target_node is None:
+	    target_stack_id = raw_input("target stack id: ")
+	    complete_url = BASE_URL + target_stack_id
 
-    target_node_id = int(r.content)
-    if target_node_id < 1:
-    	print("Invalid Node ID")
+	    r = requests.get(complete_url)
 
-    else:
-	    print(target_node_id)
-	    target_node = possible_nodes[target_node_id]
+	    target_node_id = int(r.content)
+	    if target_node_id < 1:
+	    	print("Invalid Target Node ID")
 
-	    finder = astar.pathfinder(neighbors = grid_neighbors(GRID_HEIGHT, GRID_WIDTH))
-	    path = finder(starting_location, target_node)
+	    else:
+	    	target_node = VALID_NODES[target_node_id]
 
-	    path_length = path[0]
-	    path_coord = path[1]
-	    print(path_coord)
-
-	    direction_queue = []
-	    for i in range(path_length):
-	        if path_coord[i][X] < path_coord[i + 1][X]:
-	            if orientation == NORTH:
-	                turn_direction = RIGHT
-
-	            elif orientation == EAST:
-	                turn_direction = STRAIGHT
-
-	            elif orientation == SOUTH:
-	                turn_direction = LEFT
-
-	            else:
-	                print("ERROR")
-
-	        elif path_coord[i][X] > path_coord[i + 1][X]:
-	            if orientation == NORTH:
-	                turn_direction = LEFT
-
-	            elif orientation == SOUTH:
-	                turn_direction = RIGHT
-
-	            elif orientation == WEST:
-	                turn_direction == STRAIGHT
-
-	            else:
-	                print("ERROR")
-
-	        elif path_coord[i][Y] < path_coord[i + 1][Y]:
-	            if orientation == NORTH:
-	                turn_direction = STRAIGHT
-
-	            elif orientation == EAST:
-	                turn_direction = LEFT
-
-	            elif orientation == WEST:
-	                turn_direction = RIGHT
-
-	            else:
-	                print("ERROR")
-
-	        elif path_coord[i][Y] > path_coord[i + 1][Y]:
-	            if orientation == EAST:
-	                turn_direction = RIGHT
-
-	            elif orientation == SOUTH:
-	                turn_direction = STRAIGHT
-
-	            elif orientation == WEST:
-	                turn_direction = LEFT
-
-	            else:
-	                print("ERROR")
-
-	        else:
-	            print("error")
+   	return(target_node)
 
 
-	        if turn_direction == LEFT:
-	            if orientation == NORTH:
-	                orientation = WEST
-
-	            else:
-	                orientation -= 1
-
-	        elif turn_direction == RIGHT:
-	            if orientation == WEST:
-	                orientation = NORTH
-	                
-	            else:
-	                orientation += 1
-	                
-	        direction_queue.append(turn_direction)
-
-	    return(direction_queue)
-
-
-def grid_neighbors(height, width):
+def grid_neighbors(height, width, current_x, current_y):
     def func(coord):
         neighbor_list = [(coord[X], coord[Y] + 1),
                          (coord[X], coord[Y] - 1),
@@ -248,10 +181,138 @@ def grid_neighbors(height, width):
     return func
 
 
-socket_connection.connect((HOST_IP, PORT))
-connected = True
+def find_path(current_node, target_node):
+	finder = astar.pathfinder(neighbors = grid_neighbors(GRID_HEIGHT, GRID_WIDTH))
+	path_info = finder(current_node, target_node)
 
-while connected:
+	return(path_info)
+
+
+def update_orientation(turn_direction, orientation):
+	if turn_direction == LEFT:
+        if orientation == NORTH:
+            orientation = WEST
+
+        else:
+            orientation -= 1
+
+    elif turn_direction == RIGHT:
+        if orientation == WEST:
+            orientation = NORTH
+            
+        else:
+            orientation += 1
+
+    elif turn_direction == REVERSE:
+    	if orientation == SOUTH:
+    		orientation == NORTH
+
+    	elif orientation == WEST:
+    		orientation == SOUTH
+
+    	else:
+    		orientation += 2
+
+
+def path_to_directions(path_length, path_coord):
+	global orientation
+
+	direction_queue = []
+    for i in range(path_length):
+        if path_coord[i][X] < path_coord[i + 1][X]:
+            if orientation == NORTH:
+                turn_direction = RIGHT
+
+            elif orientation == EAST:
+                turn_direction = STRAIGHT
+
+            elif orientation == SOUTH:
+                turn_direction = LEFT
+
+            elif orientation == WEST:
+            	turn_direction = REVERSE
+
+            else:
+                print("INVALID ORIENTATION")
+
+        elif path_coord[i][X] > path_coord[i + 1][X]:
+            if orientation == NORTH:
+                turn_direction = LEFT
+
+            elif orientation == EAST:
+            	turn_direction = REVERSE
+
+            elif orientation == SOUTH:
+                turn_direction = RIGHT
+
+            elif orientation == WEST:
+                turn_direction == STRAIGHT
+
+            else:
+                print("INVALID ORIENTATION")
+
+        elif path_coord[i][Y] < path_coord[i + 1][Y]:
+            if orientation == NORTH:
+                turn_direction = STRAIGHT
+
+            elif orientation == EAST:
+                turn_direction = LEFT
+
+            elif orientation == SOUTH:
+            	turn_direction = REVERSE
+
+            elif orientation == WEST:
+                turn_direction = RIGHT
+
+            else:
+                print("INVALID ORIENTATION")
+
+        elif path_coord[i][Y] > path_coord[i + 1][Y]:
+        	if orientation == NORTH:
+        		turn_direction = REVERSE
+
+            elif orientation == EAST:
+                turn_direction = RIGHT
+
+            elif orientation == SOUTH:
+                turn_direction = STRAIGHT
+
+            elif orientation == WEST:
+                turn_direction = LEFT
+
+            else:
+                print("INVALID ORIENTATION")
+
+        else:
+            print("INVALID COORDINATES; UNABLE TO CALCULATE PATH")
+
+        orientation = update_orientation(turn_direction, orientation)
+
+        direction_queue.append(turn_direction)
+
+    return(direction_queue)
+
+
+def a_star(current_node):
+    if current_node == HOME_NODE:
+    	target_node = get_target_node()
+
+    else:
+    	target_node = HOME_NODE
+
+    path_info = find_path(current_node, target_node)
+
+    path_length = path_info[0]
+    path_coord = path_info[1]
+
+    direction_queue = path_to_directions()
+
+    return(direction_queue)
+
+
+socket_connection.connect((HOST_IP, PORT))
+
+while True:
 	if mode == QUEUE_CONTROL:
 		directions = queue_control()
 		directions.append(QUEUE_CONTROL)
@@ -261,13 +322,22 @@ while connected:
 		manual_control()
 
 	elif mode == A_STAR:
-		directions = a_star()
+		directions = a_star(HOME_NODE)
 		directions.append(A_STAR)
 		send_data(directions, socket_connection)
 
+		print("Waiting for robot to reach destination.")
+		socket_connection.recv(1024)
+		print("Robot reached destination. Returning home.")
+
+		current_node = directions[len(directions) - 2]
+		directions = a_star(current_node)
+		directions.append(A_STAR)
+		send_data(directions, socket_connection)
+
+
 	else:
 		print("NOT A VALID MODE")
-		
-
-socket_connection.send_all(DISCONNECT_MESSAGE)
-socket_connection.close()
+		socket_connection.send_all(DISCONNECT_MESSAGE)
+		socket_connection.close()
+		break
