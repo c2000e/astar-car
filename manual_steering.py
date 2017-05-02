@@ -179,7 +179,7 @@ def handle_node(turn_direction):
 	if turn_direction != STRAIGHT:
 		turn(turn_direction)
 
-	else:
+	if turn_direction == STRAIGHT or turn_direction == REVERSE:
 		black_side *= -1
 
 	exit_node()
