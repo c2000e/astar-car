@@ -160,7 +160,7 @@ def turn(turn_direction):
 			elif turn_direction == RIGHT:
 				if current_color != WHITE:
 					l_motor.speed_sp = MAX_SPEED * turn_speed_reduction
-					r_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
+					#r_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
 				else:
 					turn_complete = True
 
@@ -204,7 +204,7 @@ def exit_node():
 	target_reflection = 35
 	cl.mode = "COL-REFLECT"
 
-	for i in range(1000):
+	for i in range(300):
 		error = (target_reflection - cl.value())
 
 		l_speed = (LEGO_SLOPE * error * black_side) + MAX_SPEED
