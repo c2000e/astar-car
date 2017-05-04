@@ -32,7 +32,7 @@ turn_speed_reduction = 0.2
 # Boolean value (1 or -1) that decides whether the robot should expect black to be on the left or right side of the robot's center.
 black_side = 1
 
-direction_queue = [REVERSE, REVERSE, REVERSE]
+direction_queue = [RIGHT, REVERSE, LEFT]
 
 # Initializes color sensor and ensures it is connected.
 cl = ColorSensor()
@@ -153,15 +153,13 @@ def turn(turn_direction):
 		if black_side == 1:
 			if turn_direction == LEFT:
 				if current_color != BLACK:
-					l_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
-					r_motor.speed_sp = MAX_SPEED
+					r_motor.speed_sp = MAX_SPEED * turn_speed_reduction
 				else:
 					turn_complete = True
 
 			elif turn_direction == RIGHT:
 				if current_color != WHITE:
 					l_motor.speed_sp = MAX_SPEED * turn_speed_reduction
-					#r_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
 				else:
 					turn_complete = True
 
@@ -183,24 +181,30 @@ def turn(turn_direction):
 		elif black_side == -1:
 			if turn_direction == LEFT:
 				if current_color != WHITE:
-					l_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
-					r_motor.speed_sp = MAX_SPEED
+					r_motor.speed_sp = MAX_SPEED * turn_speed_reduction
 				else:
 					turn_complete = True	
 
 			elif turn_direction == RIGHT:
 				if current_color != BLACK:
-					l_motor.speed_sp = MAX_SPEED
-					r_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
+					l_motor.speed_sp = MAX_SPEED * turn_speed_reduction
 				else:
 					turn_complete = True
 
 			elif turn_direction == REVERSE:
-				if current_color != BLACK:
-					l_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
-					r_motor.speed_sp = MAX_SPEED * turn_speed_reduction
-				else:
-					turn_complete = True	
+				if half_turn_complete != True:
+					if current_color != BLACK:
+						l_motor.speed_sp = MAX_SPEED * turn_speed_reduction
+						r_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
+					else:
+						half_turn_complete = True
+
+				elif current_color != WHITE:
+					l_motor.speed_sp = MAX_SPEED * turn_speed_reduction
+					r_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
+				
+				else:	
+					turn_complete = True
 
 
 		run_motors()
