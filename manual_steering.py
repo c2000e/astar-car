@@ -212,6 +212,7 @@ def turn(turn_direction):
 	global black_side
 
 	turn_complete = False
+	half_turn_complete = False
 
 	heading = turn_direction
 
