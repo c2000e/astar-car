@@ -204,7 +204,7 @@ def exit_node():
 	target_reflection = 35
 	cl.mode = "COL-REFLECT"
 
-	for i in range(100):
+	for i in range(1000):
 		error = (target_reflection - cl.value())
 
 		l_speed = (LEGO_SLOPE * error * black_side) + MAX_SPEED
