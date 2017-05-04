@@ -165,7 +165,7 @@ def turn(turn_direction):
 					turn_complete = True
 
 			elif turn_direction == REVERSE:
-				if current_color != BLACK:
+				if current_color != WHITE:
 					l_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
 					r_motor.speed_sp = MAX_SPEED * turn_speed_reduction
 				else:
@@ -187,7 +187,7 @@ def turn(turn_direction):
 					turn_complete = True
 
 			elif turn_direction == REVERSE:
-				if current_color != WHITE:
+				if current_color != BLACK:
 					l_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
 					r_motor.speed_sp = MAX_SPEED * turn_speed_reduction
 				else:
