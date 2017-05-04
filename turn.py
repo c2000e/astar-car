@@ -32,7 +32,7 @@ turn_speed_reduction = 0.2
 # Boolean value (1 or -1) that decides whether the robot should expect black to be on the left or right side of the robot's center.
 black_side = 1
 
-direction_queue = [RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT]
+direction_queue = [REVERSE, REVERSE, REVERSE]
 
 # Initializes color sensor and ensures it is connected.
 cl = ColorSensor()
