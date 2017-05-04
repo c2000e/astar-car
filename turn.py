@@ -143,6 +143,7 @@ def turn(turn_direction):
 	global black_side
 
 	turn_complete = False
+	half_turn_complete = False
 
 	heading = turn_direction
 
@@ -165,10 +166,15 @@ def turn(turn_direction):
 					turn_complete = True
 
 			elif turn_direction == REVERSE:
-				if current_color != WHITE:
-					l_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
-					r_motor.speed_sp = MAX_SPEED * turn_speed_reduction
-				else:
+				if half_turn_complete != True:
+					if current_color != BLACK:
+						l_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
+						r_motor.speed_sp = MAX_SPEED * turn_speed_reduction
+				elif current_color != WHITE:
+					l_motor.speed_sp = MAX_SPEED * turn_speed_reduction
+					r_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
+				
+				else:	
 					turn_complete = True
 
 		elif black_side == -1:
