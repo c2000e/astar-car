@@ -64,6 +64,9 @@ for i in range(COLOR_MEMORY_LENGTH):
 	past_colors.append("")
 
 
+btn = Button()
+
+
 # Initializes color sensor and ensures it is connected.
 cl = ColorSensor()
 assert cl.connected, "Connect color sensor."
