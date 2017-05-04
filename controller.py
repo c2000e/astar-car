@@ -12,7 +12,7 @@ MANUAL_CONTROL = 1
 A_STAR = 2
 
 # HOST_IP needs to match ev3's
-HOST_IP = "209.114.106.179"
+HOST_IP = "209.114.105.83"
 PORT = 9999
 
 # Dimensions of grid

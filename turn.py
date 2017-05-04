@@ -1,28 +1,13 @@
-#!/usr/bin/env python3
+from random import *
 from ev3dev.ev3 import *
-from time import sleep
 
-from random import choice
 
-import pickle
-import socket
-
-HOST = ""
-PORT = 9999
+LEFT = "left"
+RIGHT = "right"
+STRAIGHT = "straight"
+REVERSE = "reverse"
 
 LEGO_SLOPE = 3.6
-
-QUEUE_CONTROL = 0
-MANUAL_CONTROL = 1
-A_STAR = 2
-
-OFF = 0
-ON = 1
-
-LEFT_MOTOR = 0
-RIGHT_MOTOR = 1
-
-SUCCESS_MSG = pickle.dumps("Directions completed.")
 
 
 # Constants for colors that should be recognized by the program
@@ -31,18 +16,6 @@ BLACK = 1
 YELLOW = 4
 WHITE = 6
 
-COLORS = [UNKNOWN, BLACK, YELLOW, WHITE]
-
-COLOR_MEMORY_LENGTH = 10
-
-ROAD_THRESHOLD = 1.1
-NODE_THRESHOLD = 0.3
-
-
-LEFT = "left"
-RIGHT = "right"
-STRAIGHT = "straight"
-REVERSE = "reverse"
 
 # Integer value between 0 and 1000 that limits the speed of the motors.
 MAX_SPEED = 360
@@ -59,10 +32,7 @@ turn_speed_reduction = 0.2
 # Boolean value (1 or -1) that decides whether the robot should expect black to be on the left or right side of the robot's center.
 black_side = 1
 
-past_colors = []
-for i in range(COLOR_MEMORY_LENGTH):
-	past_colors.append("")
-
+direction_queue = [RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT]
 
 # Initializes color sensor and ensures it is connected.
 cl = ColorSensor()
@@ -93,9 +63,6 @@ cl.mode = "COL-COLOR"
 ir.mode = "IR-PROX"
 
 
-socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-
 # Runs the motors until stopped while also allowing easy adjustment of speed.
 def run_motors():
 	l_motor.run_forever()
@@ -111,23 +78,12 @@ def stop_motors():
 	r_motor.stop(stop_action = "hold")
 
 
-def detect_color():
-	global COLORS
-	global past_colors
+def handle_failure():
+	stop_motors()
 
-	current_color = cl.value()
 
-	for i in range(len(past_colors) - 1):
-		past_colors[i] = past_colors[i + 1]
-	
-	past_colors[len(past_colors) - 1] = current_color
-
-	percent_unknown = past_colors.count(UNKNOWN) / len(past_colors)
-	percent_black = past_colors.count(BLACK) / len(past_colors)
-	percent_yellow = past_colors.count(YELLOW) / len(past_colors)
-	percent_white = past_colors.count(WHITE) / len(past_colors)
-
-	return(percent_unknown, percent_black, percent_yellow, percent_white)
+def handle_success():
+	print("Success!")
 
 
 # Changes the speed of the motors to make the robot follow a line.
@@ -167,11 +123,12 @@ def follow_road():
 	run_motors()
 
 
-def handle_node(turn_direction):
-	global past_colors
+def handle_node(turn_index):
 	global black_side
 
 	stop_motors()
+
+	turn_direction = get_directions(turn_index)
 
 	if turn_direction != STRAIGHT:
 		turn(turn_direction)
@@ -180,29 +137,6 @@ def handle_node(turn_direction):
 		black_side *= -1
 
 	exit_node()
-
-	past_colors = []
-	for i in range(COLOR_MEMORY_LENGTH):
-		past_colors.append("")	
-
-
-def handle_failure():
-	stop_motors()
-
-
-def handle_success():
-	print("Success!")
-
-
-def get_directions():
-	global black_side
-
-	turn_direction = choice(DIRECTIONS)
-	
-	if turn_direction == STRAIGHT:
-		black_side *= -1
-
-	return(turn_direction)
 
 
 def turn(turn_direction):
@@ -290,91 +224,20 @@ def exit_node():
 	cl.mode = "COL-COLOR"
 
 
-socket.bind((HOST, PORT))
-socket.listen(1)
-socket_connection, client_ip = socket.accept()
-print("Connected to ", client_ip)
+def get_directions(turn_index):
+	global black_side
 
-while True:
-	ser_direction_queue = socket_connection.recv(1024)
+	turn_direction = direction_queue[turn_index]
 
-	# Error checking needs to happen between here...
-
-	direction_queue = pickle.loads(ser_direction_queue)
-	direction_queue_length = len(direction_queue) - 1
-
-	# ...and here
-
-	socket_connection.sendall(SUCCESS_MSG)
-
-	mode = direction_queue[direction_queue_length]
-
-	if mode == QUEUE_CONTROL:
-		for i in range(direction_queue_length):
-			turn_direction = direction_queue[i]
-
-			while True:
-				color_percents = detect_color()
-
-				if (color_percents[0] < ROAD_THRESHOLD) and (color_percents[2] < NODE_THRESHOLD):
-					follow_road()
-
-				elif color_percents[2] >= NODE_THRESHOLD:
-					handle_node(turn_direction)
-					break
-
-				else:
-					handle_failure()
+	return(turn_direction)
 
 
-	elif mode == MANUAL_CONTROL:
-		l_motor.speed_sp = MAX_SPEED
-		r_motor.speed_sp = MAX_SPEED
+for i in range(len(direction_queue)):
+	if (cl.value == BLACK) or (cl.value == WHITE):
+		follow_road()
 
-		if direction_queue[LEFT_MOTOR] == ON:
-			l_motor.run_timed(time_sp = 100)
-
-		else:
-			l_motor.stop(stop_action = "hold")
-
-		if direction_queue[RIGHT_MOTOR] == ON:
-			r_motor.run_timed(time_sp = 100)
-
-		else:
-			r_motor.stop(stop_action = "hold")
-
-
-	elif mode == A_STAR:
-		for i in range(direction_queue_length + 1):
-			if i < direction_queue_length:
-				turn_direction = direction_queue[i]
-
-			while True:
-				color_percents = detect_color()
-
-				if (color_percents[0] < ROAD_THRESHOLD) and (color_percents[2] < NODE_THRESHOLD):
-					follow_road()
-
-				elif color_percents[2] >= NODE_THRESHOLD:
-					if i < direction_queue_length:
-						handle_node(turn_direction)
-						stop_motors()
-						break
-
-					else:
-						stop_motors()
-						break
-
-				else:
-					handle_failure()
-					break
-
-		socket_connection.sendall(SUCCESS_MSG)
+	elif cl.value() == YELLOW:
+		handle_node(i)
 
 	else:
-		print("INVALID MODE")
-
-
-# Stops the robot and notifies the user with a beep.
-stop_motors()
-Sound.beep()
+		handle_failure()
