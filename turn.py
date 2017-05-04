@@ -234,7 +234,7 @@ def get_directions(turn_index):
 
 for i in range(len(direction_queue)):
 	while True:
-		if (cl.value == BLACK) or (cl.value == WHITE):
+		if cl.value != YELLOW:
 			print("follow")
 			follow_road()
 
