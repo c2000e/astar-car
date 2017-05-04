@@ -233,11 +233,13 @@ def get_directions(turn_index):
 
 
 for i in range(len(direction_queue)):
-	if (cl.value == BLACK) or (cl.value == WHITE):
-		follow_road()
+	while True:
+		if (cl.value == BLACK) or (cl.value == WHITE):
+			follow_road()
 
-	elif cl.value() == YELLOW:
-		handle_node(i)
+		elif cl.value() == YELLOW:
+			handle_node(i)
+			break
 
-	else:
-		handle_failure()
+		else:
+			handle_failure()
