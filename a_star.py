@@ -1,27 +1,9 @@
-import msvcrt
-import pickle
 import requests
-import socket
-
 from pypaths import astar
-
-
-# Possible modes
-QUEUE_CONTROL = 0
-MANUAL_CONTROL = 1
-A_STAR = 2
-
-# HOST_IP needs to match ev3's
-HOST_IP = "209.114.105.83"
-PORT = 9999
 
 # Dimensions of grid
 GRID_HEIGHT = 6
 GRID_WIDTH = 6
-
-# For readability
-OFF = 0
-ON = 1
 
 # Makes list indexing easier to read
 X = 0
@@ -52,82 +34,7 @@ HOME_NODE = (0, 0)
 # Partial URL for library database
 BASE_URL = "http://bigcat.fhsu.edu/newmedia/projects/stacks/robotStackToNode.php?stackID="
 
-# Socket connections require a string to be sent when the connection ends
-DISCONNECT_MESSAGE = "DISCONNECT"
-
-
-mode = 2
 orientation = NORTH
-
-socket_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-
-def get_typed_direction_queue():
-    user_input = False
-    possible_inputs = ["left", "right", "straight", "send"]
-    direction_queue = []
-
-    while True:
-        user_input = raw_input("'left', 'right', or 'straight'. 'send' to deliver instructions to robot: ")
-
-        if user_input in possible_inputs[0:3]:
-            direction_queue.append(user_input)
-
-        elif user_input == possible_inputs[3]:
-            break
-
-        elif user_input == "8":
-            direction_queue = [LEFT, LEFT, RIGHT, RIGHT, RIGHT, RIGHT, LEFT]
-            break
-
-        else:
-            print("Please input 'left', 'right', 'straight', or 'send'.")
-
-    return(direction_queue)
-
-
-def send_data(data, socket_connection):
-    ser_data = pickle.dumps(data)
-
-    socket_connection.sendall(ser_data)
-
-    while not socket_connection.recv(1024):
-        print("Waiting for reply...")
-
-    print("Directions sent successfully")
-
-
-def queue_control():
-    direction_queue = get_typed_direction_queue()
-    return(direction_queue)
-
-
-def manual_control():
-    global socket_connection
-
-    while True:
-        key = msvcrt.getwch()
-
-        if key == "w":
-            left_motor = ON
-            right_motor = ON
-
-        elif key == "a":
-            left_motor = OFF
-            right_motor = ON
-
-        elif key == "d":
-            left_motor = ON
-            right_motor = OFF
-
-        else:
-            left_motor = OFF
-            right_motor = OFF
-
-        directions = [left_motor, right_motor, MANUAL_CONTROL]
-
-        send_data(directions, socket_connection)
-
 
 def get_target_node():
     target_node = None
@@ -306,38 +213,6 @@ def a_star(current_node):
 
     return(direction_queue, current_node)
 
-
-socket_connection.connect((HOST_IP, PORT))
-
 while True:
-    if mode == QUEUE_CONTROL:
-        directions = queue_control()
-        directions.append(QUEUE_CONTROL)
-        send_data(directions, socket_connection)
-
-    elif mode == MANUAL_CONTROL:
-        manual_control()
-
-    elif mode == A_STAR:
-        directions, current_node = a_star(HOME_NODE)
-        directions.append(A_STAR)
-        send_data(directions, socket_connection)
-
-        print("Waiting for robot to reach destination.")
-        socket_connection.recv(1024)
-        print("Robot reached destination. Returning home.")
-
-        directions, current_node = a_star(current_node)
-        directions.append(A_STAR)
-        send_data(directions, socket_connection)
-
-        print("Waiting for robot to reach destination.")
-        socket_connection.recv(1024)
-        print("Robot returned home.")
-
-
-    else:
-        print("NOT A VALID MODE")
-        socket_connection.send_all(DISCONNECT_MESSAGE)
-        socket_connection.close()
-        break
+    directions, current_node = a_star(HOME_NODE)
+    directions, current_node = a_star(current_node)

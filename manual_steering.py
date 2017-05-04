@@ -218,46 +218,58 @@ def turn(turn_direction):
 		if black_side == 1:
 			if turn_direction == LEFT:
 				if current_color != BLACK:
-					l_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
-					r_motor.speed_sp = MAX_SPEED
+					r_motor.speed_sp = MAX_SPEED * turn_speed_reduction
 				else:
 					turn_complete = True
 
 			elif turn_direction == RIGHT:
 				if current_color != WHITE:
-					l_motor.speed_sp = MAX_SPEED
-					r_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
+					l_motor.speed_sp = MAX_SPEED * turn_speed_reduction
 				else:
 					turn_complete = True
 
 			elif turn_direction == REVERSE:
-				if current_color != BLACK:
+				if half_turn_complete != True:
+					if current_color != BLACK:
+						l_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
+						r_motor.speed_sp = MAX_SPEED * turn_speed_reduction
+					else:
+						half_turn_complete = True
+
+				elif current_color != WHITE:
 					l_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
-					r_motor.speed_sp = MAX_SPEED
-				else:
+					r_motor.speed_sp = MAX_SPEED * turn_speed_reduction
+				
+				else:	
 					turn_complete = True
 
 		elif black_side == -1:
 			if turn_direction == LEFT:
 				if current_color != WHITE:
-					l_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
-					r_motor.speed_sp = MAX_SPEED
+					r_motor.speed_sp = MAX_SPEED * turn_speed_reduction
 				else:
 					turn_complete = True	
 
 			elif turn_direction == RIGHT:
 				if current_color != BLACK:
-					l_motor.speed_sp = MAX_SPEED
-					r_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
+					l_motor.speed_sp = MAX_SPEED * turn_speed_reduction
 				else:
 					turn_complete = True
 
 			elif turn_direction == REVERSE:
-				if current_color != WHITE:
-					l_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
-					r_motor.speed_sp = MAX_SPEED
-				else:
-					turn_complete = True	
+				if half_turn_complete != True:
+					if current_color != BLACK:
+						l_motor.speed_sp = MAX_SPEED * turn_speed_reduction
+						r_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
+					else:
+						half_turn_complete = True
+
+				elif current_color != WHITE:
+					l_motor.speed_sp = MAX_SPEED * turn_speed_reduction
+					r_motor.speed_sp = -MAX_SPEED * turn_speed_reduction
+				
+				else:	
+					turn_complete = True
 
 
 		run_motors()
@@ -270,7 +282,7 @@ def exit_node():
 	target_reflection = 35
 	cl.mode = "COL-REFLECT"
 
-	for i in range(100):
+	for i in range(300):
 		error = (target_reflection - cl.value())
 
 		l_speed = (LEGO_SLOPE * error * black_side) + MAX_SPEED
@@ -350,24 +362,28 @@ while True:
 				turn_direction = direction_queue[i]
 
 			while True:
-				color_percents = detect_color()
-
-				if (color_percents[0] < ROAD_THRESHOLD) and (color_percents[2] < NODE_THRESHOLD):
-					follow_road()
-
-				elif color_percents[2] >= NODE_THRESHOLD:
-					if i < direction_queue_length:
-						handle_node(turn_direction)
-						stop_motors()
-						break
-
-					else:
-						stop_motors()
-						break
+				if btn.any():
+					exit()
 
 				else:
-					handle_failure()
-					break
+					color_percents = detect_color()
+
+					if (color_percents[0] < ROAD_THRESHOLD) and (color_percents[2] < NODE_THRESHOLD):
+						follow_road()
+
+					elif color_percents[2] >= NODE_THRESHOLD:
+						if i < direction_queue_length:
+							handle_node(turn_direction)
+							stop_motors()
+							break
+
+						else:
+							stop_motors()
+							break
+
+					else:
+						handle_failure()
+						break
 
 		socket_connection.sendall(SUCCESS_MSG)
 
