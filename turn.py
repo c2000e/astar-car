@@ -234,11 +234,14 @@ def get_directions(turn_index):
 
 for i in range(len(direction_queue)):
 	while True:
-		if cl.value != YELLOW:
+		current_color = cl.value()
+		print(current_color)
+
+		if current_color != YELLOW:
 			print("follow")
 			follow_road()
 
-		elif cl.value() == YELLOW:
+		elif current_color == YELLOW:
 			print("turn")
 			handle_node(i)
 			break
