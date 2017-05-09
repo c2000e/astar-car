@@ -251,6 +251,8 @@ def handle_failure():
 	socket_connection.shutdown(socket_library.SHUT_RDWR)
 	socket_connection.close()
 
+	sleep(3)
+
 	exit()
 
 
