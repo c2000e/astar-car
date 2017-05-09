@@ -243,7 +243,7 @@ def handle_node(turn_direction):
 		past_colors.append("")	
 
 
-#
+# Called when the robot is prevented from reaching its destination
 def handle_failure():
 	stop_motors()
 
@@ -254,11 +254,6 @@ def handle_failure():
 	sleep(3)
 
 	exit()
-
-
-#
-def handle_success():
-	print("Success!")
 
 
 # No longer used; returns random direction from a list of possible directions
@@ -401,8 +396,9 @@ def exit_node():
 	stop_motors()
 	cl.mode = "COL-COLOR"
 
-
+socket.setsockopt(socket_library.SOL_SOCKET, socket_library.SO_REUSEADDR, 1)
 socket.bind((HOST, PORT))
+
 socket.listen(1)
 socket_connection, client_ip = socket.accept()
 print("Connected to ", client_ip)
