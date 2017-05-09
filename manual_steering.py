@@ -24,10 +24,10 @@ LEFT_MOTOR = 0
 RIGHT_MOTOR = 1
 
 # Messages sent to the server for handling
-ACCEPT_MSG = pickle.dumps("Directions accepted.")
-DECLINE_MSG = pickle.dumps("Directions invalid")
-SUCCESS_MSG = pickle.dumps("Directions completed.")
-FAILURE_MSG = pickle.dumps("Direction completion failed.")
+ACCEPT_MSG = pickle.dumps("Directions accepted.", protocol = 0)
+DECLINE_MSG = pickle.dumps("Directions invalid", protocol = 0)
+SUCCESS_MSG = pickle.dumps("Directions completed.", protocol = 0)
+FAILURE_MSG = pickle.dumps("Direction completion failed.", protocol = 0)
 
 
 # Constants for colors that should be recognized by the program
