@@ -203,12 +203,14 @@ def check_for_obstacles():
 	global obstacle_detected_counter
 
 	if ir.value() < MIN_DISTANCE:
+		stop_motors()
 		obstacle_detected_counter += 1
 		Sound.speak("Please move the obstacle out of my driving path. Thank you.").wait()
 		sleep(10)
 
 	# collision check
 	elif ts.value():
+		stop_motors()
 		obstacle_detected_counter += 1
 		Sound.speak("Please move the obstacle out of my driving path. Thank you.").wait()
 		sleep(10)
