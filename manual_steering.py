@@ -41,6 +41,7 @@ COLORS = [UNKNOWN, BLACK, YELLOW, WHITE]
 # How many sensor readings should be stored to check for errors
 COLOR_MEMORY_LENGTH = 10
 
+MIN_DISTANCE = 50
 
 # Percentages used to control how the robot reacts to changes in color
 # calculated by dividing amount of a color by the color memory length
