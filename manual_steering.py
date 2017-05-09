@@ -5,7 +5,7 @@ from time import sleep
 from random import choice
 
 import pickle
-import socket
+import socket as socket_library
 
 HOST = ""
 PORT = 9999
@@ -122,7 +122,7 @@ ir.mode = "IR-PROX"
 
 
 # Creates a socket object used to connect to the server
-socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+socket = socket_library.socket(socket_library.AF_INET, socket_library.SOCK_STREAM)
 
 
 # Runs the motors until stopped while also allowing easy adjustment of speed.
@@ -248,7 +248,7 @@ def handle_failure():
 	stop_motors()
 
 	socket_connection.sendall(FAILURE_MSG)
-	socket_connection.shutdown(socket.SHUT_RDWR)
+	socket_connection.shutdown(socket_library.SHUT_RDWR)
 	socket_connection.close()
 
 	exit()
