@@ -4,12 +4,13 @@ import requests
 import socket
 
 from pypaths import astar
-
+from time import sleep
 
 # Possible modes
 QUEUE_CONTROL = 0
 MANUAL_CONTROL = 1
 A_STAR = 2
+CELEBRATE = 3
 
 # HOST_IP needs to match ev3's
 HOST_IP = "209.114.105.223"
@@ -50,13 +51,18 @@ for y in range(GRID_HEIGHT):
 HOME_NODE = (0, 0)
 
 # Partial URL for library database
-BASE_URL = "http://bigcat.fhsu.edu/newmedia/projects/stacks/robotStackToNode.php?stackID="
+BASE_URL = "http://bigcat.fhsu.edu/newmedia/projects/stacks/robotLocateItem.php?call="
+
+# 
+ROBOT_SUCCESS_MSG = ("Directions completed.")
+ROBOT_FAILURE_MSG = ("Direction completion failed.")
 
 # Socket connections require a string to be sent when the connection ends
 DISCONNECT_MESSAGE = "DISCONNECT"
 
-
 mode = 2
+
+# What direction should the robot expect to face when first starting in relation to the grid?
 orientation = NORTH
 
 socket_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -93,8 +99,6 @@ def send_data(data, socket_connection):
 
     while not socket_connection.recv(1024):
         print("Waiting for reply...")
-
-    print("Directions sent successfully")
 
 
 def queue_control():
@@ -133,8 +137,10 @@ def get_target_node():
     target_node = None
 
     while target_node is None:
-        target_stack_id = raw_input("target stack id: ")
-        complete_url = BASE_URL + target_stack_id
+        raw_target_book_id = raw_input("target book id: ")
+        target_book_id = raw_target_book_id.replace(" ", "+")
+
+        complete_url = BASE_URL + target_book_id
 
         r = requests.get(complete_url)
 
@@ -148,13 +154,18 @@ def get_target_node():
     return(target_node)
 
 
+# Replacement for default "grid_neighbors" function that comes with the pypaths library
+# Follows the same format of the original function
+# Takes in a height and width, which correspond to the dimensions of the grid being used
 def grid_neighbors(height, width):
     def func(coord):
+        # Default values for node with four neighbors
         neighbor_list = [(coord[X], coord[Y] + 1),
                          (coord[X], coord[Y] - 1),
                          (coord[X] + 1, coord[Y]),
                          (coord[X] - 1, coord[Y])]
 
+        # Checks if the node is in an even row and updates its neighbors accordingly
         if coord[Y] % 2 == 0:
             del neighbor_list[3]
             del neighbor_list[2]
@@ -165,6 +176,7 @@ def grid_neighbors(height, width):
             if coord[Y] + 1 >= height:
                 del neighbor_list[0]
 
+        # Ensures all coords are within grid
         return [c for c in neighbor_list
                 if c != coord
                 and c[0] >= 0 and c[0] < width
@@ -173,14 +185,16 @@ def grid_neighbors(height, width):
     return func
 
 
+# Takes a starting node and ending node, calculates a path between the two points, and returns a list of coordinates the path goes through
 def find_path(current_node, target_node):
     finder = astar.pathfinder(neighbors = grid_neighbors(GRID_HEIGHT, GRID_WIDTH))
     path_info = finder(current_node, target_node)
 
     return(path_info)
 
-
+# Takes a turn direction and an old orientation, determines the new orientation, and returns the new orientation
 def update_orientation(turn_direction, orientation):
+    # All orientation constants are stored as ints ranging from 0 to 3.
     if turn_direction == LEFT:
         if orientation == NORTH:
             orientation = WEST
@@ -208,11 +222,16 @@ def update_orientation(turn_direction, orientation):
     return(orientation)
 
 
+# Takes the length of the path in nodes and a list of all the path coordinates and generates a list of turning directions by utilizing the current orientation
 def path_to_directions(path_length, path_coord):
     global orientation
 
+    # direction_queue is the list of turning directions which eventually gets sent to the robot
     direction_queue = []
+
+    # Converts each coordinate into a turning direction that robot can use
     for i in range(path_length):
+        # need to go east in the grid
         if path_coord[i][X] < path_coord[i + 1][X]:
             if orientation == NORTH:
                 turn_direction = RIGHT
@@ -229,6 +248,7 @@ def path_to_directions(path_length, path_coord):
             else:
                 print("INVALID ORIENTATION")
 
+        # need to go west in the grid
         elif path_coord[i][X] > path_coord[i + 1][X]:
             if orientation == NORTH:
                 turn_direction = LEFT
@@ -245,6 +265,7 @@ def path_to_directions(path_length, path_coord):
             else:
                 print("INVALID ORIENTATION")
 
+        # need to go north in the grid
         elif path_coord[i][Y] < path_coord[i + 1][Y]:
             if orientation == NORTH:
                 turn_direction = STRAIGHT
@@ -261,6 +282,7 @@ def path_to_directions(path_length, path_coord):
             else:
                 print("INVALID ORIENTATION")
 
+        # need to go south in the grid
         elif path_coord[i][Y] > path_coord[i + 1][Y]:
             if orientation == NORTH:
                 turn_direction = REVERSE
@@ -280,20 +302,25 @@ def path_to_directions(path_length, path_coord):
         else:
             print("INVALID COORDINATES; UNABLE TO CALCULATE PATH")
 
+        # updates orientation to represent the robot after completing the turn
         orientation = update_orientation(turn_direction, orientation)
 
+        # adds the turn direction to the list of directions the robot will be sent
         direction_queue.append(turn_direction)
 
     return(direction_queue)
 
 
 def a_star(current_node):
+    # if the robot is home, it needs to be given a destination
     if current_node == HOME_NODE:
         target_node = get_target_node()
 
+    # if the robot is not home, it should go home
     else:
         target_node = HOME_NODE
 
+    # retrieves the length of the path in nodes between the current node and target node, as well as a list of coordinates the path goes through
     path_info = find_path(current_node, target_node)
 
     path_length = path_info[0]
@@ -301,43 +328,78 @@ def a_star(current_node):
     
     current_node = path_coord[path_length]
 
+    # converts the list of coordinates to a list of turn directions
     direction_queue = path_to_directions(path_length, path_coord)
     print(direction_queue)
 
     return(direction_queue, current_node)
 
-
+# connects to the robot
 socket_connection.connect((HOST_IP, PORT))
 
+
+# main loop
 while True:
+    # provide the robot with a list of manually-typed directions
+    # it is up to the user to ensure the directions are possible and the robot reaches its destination
     if mode == QUEUE_CONTROL:
         directions = queue_control()
         directions.append(QUEUE_CONTROL)
         send_data(directions, socket_connection)
 
+    # drive using W, A, and D keys
     elif mode == MANUAL_CONTROL:
         manual_control()
 
+    # goes to a user-given target node and then returns back to its starting location
     elif mode == A_STAR:
         directions, current_node = a_star(HOME_NODE)
         directions.append(A_STAR)
         send_data(directions, socket_connection)
 
         print("Waiting for robot to reach destination.")
-        socket_connection.recv(1024)
-        print("Robot reached destination. Returning home.")
+        ser_response_msg = socket_connection.recv(1024)
+        response_msg = pickle.loads(ser_response_msg)
 
-        directions, current_node = a_star(current_node)
-        directions.append(A_STAR)
-        send_data(directions, socket_connection)
+        if response_msg == ROBOT_FAILURE_MSG:
+            print("Robot failed. Please retrieve the robot and return it to its home.")
+            exit()
 
-        print("Waiting for robot to reach destination.")
-        socket_connection.recv(1024)
-        print("Robot returned home.")
+        else:
+            print("Robot reached destination.")
+
+            send_data(CELEBRATE)
+
+            print("Waiting for robot to complete celebration.")
+            ser_response_msg = socket_connection.recv(1024)
+            response_msg = pickle.loads(ser_response_msg)
+
+            if response_msg == ROBOT_FAILURE_MSG:
+                print("Robot failed. Please retrieve the robot and return it to its home.")
+                exit()
+
+            else:
+                print("Robot completed celebration. Returning home.")
+
+                directions, current_node = a_star(current_node)
+                directions.append(A_STAR)
+                send_data(directions, socket_connection)
+
+                print("Waiting for robot to reach destination.")
+
+                ser_response_msg = socket_connection.recv(1024)
+                response_msg = pickle.loads(ser_response_msg)
+
+                if response_msg == ROBOT_FAILURE_MSG:
+                    print("Robot failed. Please retrieve the robot and return it to its home.")
+                    exit()
+                
+                else:
+                    print("Robot returned home.")
 
 
     else:
         print("NOT A VALID MODE")
+        print("Exiting.")
         socket_connection.send_all(DISCONNECT_MESSAGE)
-        socket_connection.close()
-        break
+        exit()

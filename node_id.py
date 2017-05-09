@@ -22,11 +22,10 @@ complete_url = BASE_URL + target_book_id
 r = requests.get(complete_url)
 
 target_node_id = int(r.content)
+print(target_node_id)
 if target_node_id < 1:
     print("Invalid Target Node ID")
 
 else:
     target_node = VALID_NODES[target_node_id]
-
-    print(target_node_id)
     print(target_node)
