@@ -57,6 +57,9 @@ BASE_URL = "http://bigcat.fhsu.edu/newmedia/projects/stacks/robotLocateItem.php?
 ROBOT_SUCCESS_MSG = ("Directions completed.")
 ROBOT_FAILURE_MSG = ("Direction completion failed.")
 
+# Socket connections require a string to be sent when the connection ends
+DISCONNECT_MESSAGE = "DISCONNECT"
+
 mode = 2
 
 # What direction should the robot expect to face when first starting in relation to the grid?
@@ -364,8 +367,8 @@ while True:
 
         else:
             print("Robot reached destination.")
-
-            send_data(CELEBRATE)
+            directions = [CELEBRATE]
+            send_data(directions, socket_connection)
 
             print("Waiting for robot to complete celebration.")
             ser_response_msg = socket_connection.recv(1024)
@@ -398,8 +401,6 @@ while True:
     else:
         print("NOT A VALID MODE")
         print("Exiting.")
-
-        socket_connection.shutdown(SHUT_RDWR)
+        socket_connection.shutdown(socket.SHUT_RDWR)
         socket_connection.close()
-
         exit()

@@ -248,7 +248,7 @@ def handle_failure():
 	stop_motors()
 
 	socket_connection.sendall(FAILURE_MSG)
-	socket_connection.shutdown(SHUT_RDWR)
+	socket_connection.shutdown(socket.SHUT_RDWR)
 	socket_connection.close()
 
 	exit()
